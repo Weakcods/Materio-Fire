@@ -243,67 +243,71 @@
 {% block page_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Weekly Overview Chart initialization
   const weeklyOverviewChartEl = document.querySelector('#weeklyOverviewChart');
-  const weeklyOverviewChartConfig = {
-    chart: {
-      height: 200,
-      type: 'bar',
-      toolbar: {
-        show: false
-      }
-    },
-    plotOptions: {
-      bar: {
-        borderRadius: 8,
-        columnWidth: '30%'
-      }
-    },
-    grid: {
-      borderColor: '#f1f1f1',
-      padding: {
-        bottom: -8
-      }
-    },
-    series: [{
-      name: 'Sales',
-      data: [
-        {% for day in weekly_transactions %}
-          {{ day.daily_sales|default:0|floatformat:0 }}{% if not forloop.last %},{% endif %}
-        {% endfor %}
-      ]
-    }],
-    xaxis: {
-      categories: [
-        {% for day in weekly_transactions %}
-          '{{ day.created_at__date|date:"D" }}'{% if not forloop.last %},{% endif %}
-        {% endfor %}
-      ],
-      labels: {
-        style: {
-          fontSize: '13px'
+  if (weeklyOverviewChartEl) { // Check if the chart element exists
+    const weeklyOverviewChartConfig = {
+      chart: {
+        height: 200,
+        type: 'bar',
+        toolbar: {
+          show: false
         }
       },
-      axisBorder: {
-        show: false
-      },
-      axisTicks: {
-        show: false
-      }
-    },
-    yaxis: {
-      labels: {
-        formatter: function(val) {
-          return '$' + val;
+      plotOptions: {
+        bar: {
+          borderRadius: 8,
+          columnWidth: '30%'
         }
-      }
-    },
-    colors: ['#696cff']
-  };
+      },
+      grid: {
+        borderColor: '#f1f1f1',
+        padding: {
+          bottom: -8
+        }
+      },
+      series: [{
+        name: 'Sales',
+        data: [
+          {% for day in weekly_transactions %}
+            {{ day.daily_sales|default:0|floatformat:0 }}{% if not forloop.last %},{% endif %}
+          {% endfor %}
+        ]
+      }],
+      xaxis: {
+        categories: [
+          {% for day in weekly_transactions %}
+            '{{ day.created_at__date|date:"D" }}'{% if not forloop.last %},{% endif %}
+          {% endfor %}
+        ],
+        labels: {
+          style: {
+            fontSize: '13px'
+          }
+        },
+        axisBorder: {
+          show: false
+        },
+        axisTicks: {
+          show: false
+        }
+      },
+      yaxis: {
+        labels: {
+          formatter: function(val) {
+            return '$' + val;
+          }
+        }
+      },
+      colors: ['#696cff']
+    };
 
-  if (weeklyOverviewChartEl) {
     const weeklyOverviewChart = new ApexCharts(weeklyOverviewChartEl, weeklyOverviewChartConfig);
     weeklyOverviewChart.render();
   }
+
+  // Potential other chart initializations using dashboard-chart URL
+  // (Add similar checks here if other chart JS code exists)
 });
 </script>
 {% endblock page_js %}

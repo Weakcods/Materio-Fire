@@ -20,12 +20,12 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start flex-wrap">
                         <div class="card-title mb-0">
-                            <h5 class="mb-1">Active Incidents</h5>
+                            <h5 class="mb-1"><i class="bi bi-fire me-2"></i>Active Incidents</h5>
                             <small class="text-muted">Last 24 hours</small>
                         </div>
                         <div class="avatar">
                             <div class="avatar-content bg-danger">
-                                <i class="bi bi-fire fs-4"></i>
+                                <i class="bi bi-exclamation-triangle-fill fs-4"></i>
                             </div>
                         </div>
                     </div>
@@ -38,12 +38,12 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start flex-wrap">
                         <div class="card-title mb-0">
-                            <h5 class="mb-1">Total Stations</h5>
+                            <h5 class="mb-1"><i class="bi bi-building me-2"></i>Total Stations</h5>
                             <small class="text-muted">Fire Stations</small>
                         </div>
                         <div class="avatar">
                             <div class="avatar-content bg-primary">
-                                <i class="bi bi-building fs-4"></i>
+                                <i class="bi bi-building-fill fs-4"></i>
                             </div>
                         </div>
                     </div>
@@ -56,12 +56,12 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start flex-wrap">
                         <div class="card-title mb-0">
-                            <h5 class="mb-1">Total Firefighters</h5>
+                            <h5 class="mb-1"><i class="bi bi-people me-2"></i>Total Firefighters</h5>
                             <small class="text-muted">Active Personnel</small>
                         </div>
                         <div class="avatar">
                             <div class="avatar-content bg-success">
-                                <i class="bi bi-people fs-4"></i>
+                                <i class="bi bi-person-badge-fill fs-4"></i>
                             </div>
                         </div>
                     </div>
@@ -74,12 +74,12 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start flex-wrap">
                         <div class="card-title mb-0">
-                            <h5 class="mb-1">Total Trucks</h5>
+                            <h5 class="mb-1"><i class="bi bi-truck me-2"></i>Total Trucks</h5>
                             <small class="text-muted">Fire Trucks</small>
                         </div>
                         <div class="avatar">
                             <div class="avatar-content bg-warning">
-                                <i class="bi bi-truck fs-4"></i>
+                                <i class="bi bi-truck-flatbed-fill fs-4"></i>
                             </div>
                         </div>
                     </div>
@@ -96,17 +96,17 @@
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
-                        <i class="bi bi-cloud-sun me-2"></i>Weather Conditions
+                        <i class="bi bi-cloud-sun-fill me-2"></i>Weather Conditions
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
-                            <h3 class="mb-1">{{ weather.temperature }}°C</h3>
-                            <p class="text-muted mb-0">{{ weather.weather_description }}</p>
+                            <h3 class="mb-1"><i class="bi bi-thermometer-half me-2"></i>{{ weather.temperature }}°C</h3>
+                            <p class="text-muted mb-0"><i class="bi bi-cloud me-2"></i>{{ weather.weather_description }}</p>
                         </div>
                         <div class="text-end">
-                            <p class="mb-1"><i class="bi bi-droplet me-1"></i>Humidity: {{ weather.humidity }}%</p>
+                            <p class="mb-1"><i class="bi bi-droplet-fill me-1"></i>Humidity: {{ weather.humidity }}%</p>
                             <p class="mb-0"><i class="bi bi-wind me-1"></i>Wind: {{ weather.wind_speed }} km/h</p>
                         </div>
                     </div>
@@ -119,35 +119,35 @@
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
-                        <i class="bi bi-exclamation-triangle me-2"></i>Recent Incidents
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Recent Incidents
                     </h5>
                     <a href="{% url 'fire:incident_list' %}" class="btn btn-sm btn-primary">
-                        <i class="bi bi-plus me-1"></i>New Incident
+                        <i class="bi bi-plus-circle me-1"></i>New Incident
                     </a>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Location</th>
-                                <th>Severity</th>
-                                <th>Time</th>
-                                <th>Actions</th>
+                                <th><i class="bi bi-geo-alt me-1"></i>Location</th>
+                                <th><i class="bi bi-flag me-1"></i>Severity</th>
+                                <th><i class="bi bi-clock me-1"></i>Time</th>
+                                <th><i class="bi bi-gear me-1"></i>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for incident in recent_incidents %}
                             <tr>
-                                <td>{{ incident.location.name }}</td>
+                                <td><i class="bi bi-geo-alt-fill me-1"></i>{{ incident.location.name }}</td>
                                 <td>
                                     <span class="badge bg-{{ incident.severity_level|lower }}-subtle text-{{ incident.severity_level|lower }}">
-                                        {{ incident.severity_level }}
+                                        <i class="bi bi-flag-fill me-1"></i>{{ incident.severity_level }}
                                     </span>
                                 </td>
-                                <td>{{ incident.date_time|date:"M d, H:i" }}</td>
+                                <td><i class="bi bi-clock-fill me-1"></i>{{ incident.date_time|date:"M d, H:i" }}</td>
                                 <td>
-                                    <a href="{% url 'fire:incident_detail' incident.id %}" class="btn btn-sm btn-icon btn-text-secondary rounded-pill">
-                                        <i class="bi bi-eye"></i>
+                                    <a href="{% url 'fire:incident_detail' incident.id %}" class="btn btn-sm btn-icon btn-text-secondary rounded-pill" title="View Details">
+                                        <i class="bi bi-eye-fill"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -166,7 +166,7 @@
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
-                        <i class="bi bi-bar-chart me-2"></i>Incident Statistics
+                        <i class="bi bi-bar-chart-fill me-2"></i>Incident Statistics
                     </h5>
                 </div>
                 <div class="card-body">
@@ -180,7 +180,7 @@
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
-                        <i class="bi bi-building me-2"></i>Station Statistics
+                        <i class="bi bi-building-fill me-2"></i>Station Statistics
                     </h5>
                 </div>
                 <div class="card-body">
@@ -196,10 +196,10 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">
-                        <i class="bi bi-map me-2"></i>Fire Stations Map
+                        <i class="bi bi-map-fill me-2"></i>Fire Stations Map
                     </h5>
                     <a href="{% url 'fire:station_create' %}" class="btn btn-sm btn-primary">
-                        <i class="bi bi-plus me-1"></i>Add Station
+                        <i class="bi bi-plus-circle me-1"></i>Add Station
                     </a>
                 </div>
                 <div class="card-body">
@@ -223,10 +223,23 @@
     const stationsMap = L.map('stationsMap').setView([0, 0], 2);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(stationsMap);
 
-    // Add station markers
+    // Add station markers with custom icons
+    const fireStationIcon = L.divIcon({
+        html: '<i class="bi bi-building-fill text-danger fs-4"></i>',
+        className: 'custom-div-icon',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+    });
+
     {% for station in stations %}
-    L.marker([{{ station.latitude }}, {{ station.longitude }}])
-        .bindPopup('<b>{{ station.name }}</b><br>{{ station.address }}')
+    L.marker([{{ station.latitude }}, {{ station.longitude }}], {icon: fireStationIcon})
+        .bindPopup(`
+            <div class="text-center">
+                <i class="bi bi-building-fill text-danger fs-4 mb-2"></i>
+                <h6 class="mb-1"><b>{{ station.name }}</b></h6>
+                <p class="mb-0 small">{{ station.address }}</p>
+            </div>
+        `)
         .addTo(stationsMap);
     {% endfor %}
 

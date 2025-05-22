@@ -369,7 +369,7 @@ class WeatherConditionDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('fire:weather_list')
 
 class StationsMapView(LoginRequiredMixin, TemplateView):
-    template_name = 'fire/stations_map.html'
+    template_name = 'fire/map_stations.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
