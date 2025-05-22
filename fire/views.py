@@ -107,22 +107,47 @@ class StationListView(LoginRequiredMixin, ListView):
         context['layout_path'] = 'layouts/master.html'
         return context
 
+class StationDetailView(LoginRequiredMixin, DetailView):
+    model = FireStation
+    template_name = 'fire/station_detail.html'
+    context_object_name = 'station'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
+
 class StationCreateView(LoginRequiredMixin, CreateView):
     model = FireStation
     template_name = 'fire/station_form.html'
     fields = ['name', 'address', 'contact_number', 'latitude', 'longitude']
     success_url = reverse_lazy('fire:station_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
 
 class StationUpdateView(LoginRequiredMixin, UpdateView):
     model = FireStation
     template_name = 'fire/station_form.html'
     fields = ['name', 'address', 'contact_number', 'latitude', 'longitude']
     success_url = reverse_lazy('fire:station_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
 
 class StationDeleteView(LoginRequiredMixin, DeleteView):
     model = FireStation
     template_name = 'fire/station_confirm_delete.html'
     success_url = reverse_lazy('fire:station_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
 
 class IncidentListView(LoginRequiredMixin, ListView):
     model = Incident
@@ -141,23 +166,43 @@ class IncidentDetailView(LoginRequiredMixin, DetailView):
     model = Incident
     template_name = 'fire/incident_detail.html'
     context_object_name = 'incident'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
 
 class IncidentCreateView(LoginRequiredMixin, CreateView):
     model = Incident
     template_name = 'fire/incident_form.html'
     fields = ['location', 'severity_level', 'description']
     success_url = reverse_lazy('fire:incident_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
 
 class IncidentUpdateView(LoginRequiredMixin, UpdateView):
     model = Incident
     template_name = 'fire/incident_form.html'
     fields = ['location', 'severity_level', 'description']
     success_url = reverse_lazy('fire:incident_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
 
 class IncidentDeleteView(LoginRequiredMixin, DeleteView):
     model = Incident
     template_name = 'fire/incident_confirm_delete.html'
     success_url = reverse_lazy('fire:incident_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
 
 class FirefighterListView(LoginRequiredMixin, ListView):
     model = Firefighters
@@ -173,23 +218,43 @@ class FirefighterDetailView(LoginRequiredMixin, DetailView):
     model = Firefighters
     template_name = 'fire/firefighter_detail.html'
     context_object_name = 'firefighter'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
 
 class FirefighterCreateView(LoginRequiredMixin, CreateView):
     model = Firefighters
     template_name = 'fire/firefighter_form.html'
     fields = ['name', 'rank', 'station', 'contact_number', 'email']
     success_url = reverse_lazy('fire:firefighter_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
 
 class FirefighterUpdateView(LoginRequiredMixin, UpdateView):
     model = Firefighters
     template_name = 'fire/firefighter_form.html'
     fields = ['name', 'rank', 'station', 'contact_number', 'email']
     success_url = reverse_lazy('fire:firefighter_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
 
 class FirefighterDeleteView(LoginRequiredMixin, DeleteView):
     model = Firefighters
     template_name = 'fire/firefighter_confirm_delete.html'
     success_url = reverse_lazy('fire:firefighter_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
 
 class FireTruckListView(LoginRequiredMixin, ListView):
     model = FireTruck
@@ -205,23 +270,43 @@ class FireTruckDetailView(LoginRequiredMixin, DetailView):
     model = FireTruck
     template_name = 'fire/truck_detail.html'
     context_object_name = 'truck'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
 
 class FireTruckCreateView(LoginRequiredMixin, CreateView):
     model = FireTruck
     template_name = 'fire/truck_form.html'
     fields = ['truck_number', 'station', 'status', 'capacity']
     success_url = reverse_lazy('fire:truck_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
 
 class FireTruckUpdateView(LoginRequiredMixin, UpdateView):
     model = FireTruck
     template_name = 'fire/truck_form.html'
     fields = ['truck_number', 'station', 'status', 'capacity']
     success_url = reverse_lazy('fire:truck_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
 
 class FireTruckDeleteView(LoginRequiredMixin, DeleteView):
     model = FireTruck
     template_name = 'fire/truck_confirm_delete.html'
     success_url = reverse_lazy('fire:truck_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        return context
 
 class LocationListView(LoginRequiredMixin, ListView):
     model = Locations
@@ -282,6 +367,7 @@ class StationsMapView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
         context['stations'] = FireStation.objects.all()
         return context
 
@@ -290,6 +376,7 @@ class IncidentsMapView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
         context['incidents'] = Incident.objects.all()
         return context
 
@@ -386,7 +473,7 @@ def firefighter_list(request):
         'id': firefighter.id,
         'name': firefighter.name,
         'rank': firefighter.rank,
-        'station': firefighter.station.name,
+        'station': firefighter.station,
     } for firefighter in firefighters]
     return JsonResponse(data, safe=False)
 
@@ -397,7 +484,7 @@ def firefighter_detail(request, pk):
         'id': firefighter.id,
         'name': firefighter.name,
         'rank': firefighter.rank,
-        'station': firefighter.station.name,
+        'station': firefighter.station,
         'contact_number': firefighter.contact_number,
         'email': firefighter.email,
     }
