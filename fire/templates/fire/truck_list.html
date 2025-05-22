@@ -1,0 +1,170 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Fire Trucks{% endblock title %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Fire Trucks</h5>
+          <a href="{% url 'fire:truck_create' %}" class="btn btn-primary">
+            <i class="ri-add-line me-1"></i>Add Fire Truck
+          </a>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Vehicle Number</th>
+                  <th>Type</th>
+                  <th>Station</th>
+                  <th>Capacity</th>
+                  <th>Status</th>
+                  <th>Last Maintenance</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for truck in trucks %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="avatar avatar-sm me-2">
+                        <div class="avatar-initial bg-label-danger rounded">
+                          <i class="ri-truck-line"></i>
+                        </div>
+                      </div>
+                      <span class="fw-medium">{{ truck.vehicle_number }}</span>
+                    </div>
+                  </td>
+                  <td>{{ truck.get_type_display }}</td>
+                  <td>
+                    <span class="badge bg-label-primary">{{ truck.station.name }}</span>
+                  </td>
+                  <td>{{ truck.capacity }} L</td>
+                  <td>
+                    <span class="badge bg-label-{% if truck.status == 'AVAILABLE' %}success{% elif truck.status == 'IN_USE' %}warning{% else %}danger{% endif %}">
+                      {{ truck.get_status_display }}
+                    </span>
+                  </td>
+                  <td>{{ truck.last_maintenance|date:"M d, Y" }}</td>
+                  <td>
+                    <div class="dropdown">
+                      <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                        <i class="ri-more-2-fill"></i>
+                      </button>
+                      <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{% url 'fire:truck_update' truck.pk %}">
+                          <i class="ri-edit-box-line me-2"></i>Edit
+                        </a>
+                        <a class="dropdown-item" href="{% url 'fire:truck_delete' truck.pk %}">
+                          <i class="ri-delete-bin-line me-2"></i>Delete
+                        </a>
+                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#viewTruckModal" data-truck-id="{{ truck.pk }}">
+                          <i class="ri-eye-line me-2"></i>View Details
+                        </a>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="7" class="text-center py-4">
+                    <p class="mb-0 text-muted">No fire trucks found</p>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Truck Modal -->
+<div class="modal fade" id="viewTruckModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Fire Truck Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Truck details will be loaded here -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block page_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize View Truck Modal
+  const viewTruckModal = document.getElementById('viewTruckModal');
+  if (viewTruckModal) {
+    viewTruckModal.addEventListener('show.bs.modal', function(event) {
+      const button = event.relatedTarget;
+      const truckId = button.getAttribute('data-truck-id');
+      const modalBody = this.querySelector('.modal-body');
+      
+      // Fetch truck details
+      fetch(`/api/trucks/${truckId}/`)
+        .then(response => response.json())
+        .then(data => {
+          modalBody.innerHTML = `
+            <div class="row">
+              <div class="col-12 mb-4">
+                <h6>Vehicle Information</h6>
+                <p class="mb-1"><strong>Vehicle Number:</strong> ${data.vehicle_number}</p>
+                <p class="mb-1"><strong>Type:</strong> ${data.type}</p>
+                <p class="mb-1"><strong>Station:</strong> ${data.station.name}</p>
+                <p class="mb-1"><strong>Capacity:</strong> ${data.capacity} L</p>
+                <p class="mb-1"><strong>Status:</strong> 
+                  <span class="badge bg-label-${data.status === 'AVAILABLE' ? 'success' : data.status === 'IN_USE' ? 'warning' : 'danger'}">
+                    ${data.status}
+                  </span>
+                </p>
+                <p class="mb-1"><strong>Last Maintenance:</strong> ${new Date(data.last_maintenance).toLocaleDateString()}</p>
+              </div>
+              <div class="col-12">
+                <h6>Maintenance History</h6>
+                <div class="table-responsive">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Cost</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${data.maintenance_history.map(maintenance => `
+                        <tr>
+                          <td>${new Date(maintenance.date).toLocaleDateString()}</td>
+                          <td>${maintenance.type}</td>
+                          <td>${maintenance.description}</td>
+                          <td>$${maintenance.cost}</td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+    });
+  }
+});
+</script>
+{% endblock page_js %} 

@@ -1,0 +1,13 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Fire Management System {% endblock %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+    {% block fire_content %}{% endblock %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% block fire_js %}{% endblock %}
+{% endblock %} 

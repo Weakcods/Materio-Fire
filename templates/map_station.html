@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block dashboard_content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<style>
+  .filter-control {
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+    margin-bottom: 15px;
+  }
+  .station-list {
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+    margin-bottom: 15px;
+  }
+  .station-card {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    background-color: white;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .station-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  .truck-info {
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    margin-top: 5px;
+    font-size: 0.9em;
+  }
+  .truck-info p {
+    margin: 0;
+    padding: 2px 0;
+  }
+  .station-icon {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+  }
+</style>
+
+<div class="page-inner">
+  <div class="page-header">
+    <h4 class="page-title">Fire Station Locations</h4>
+    <ul class="breadcrumbs">
+      <li class="nav-home">
+        <a href="#">
+          <i class="flaticon-home"></i>
+        </a>
+      </li>
+      <li class="separator">
+        <i class="flaticon-right-arrow"></i>
+      </li>
+      <li class="nav-item">
+        <a href="#">Maps</a>
+      </li>
+      <li class="separator">
+        <i class="flaticon-right-arrow"></i>
+      </li>
+      <li class="nav-item">
+        <a href="#">Fire Stations</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="row">
+    <!-- Left Panel -->
+    <div class="col-md-3">
+      <!-- Station List Panel -->
+      <div class="station-list">
+        <h4>Fire Stations</h4>
+        {% for station in stations %}
+        <div class="station-card" data-station-id="{{ forloop.counter0 }}">
+          <div class="d-flex align-items-center">
+            <img src="{% static 'img/firetruck.png' %}" class="station-icon">
+            <div>
+              <div class="station-name" style="font-weight: bold;">{{ station.name }}</div>
+              <div class="station-address" style="font-size: 0.8em; color: #666;">{{ station.address }}</div>
+            </div>
+          </div>
+          <div class="truck-info">
+            <strong>Assigned Trucks:</strong>
+            {% for truck in station.trucks %}
+            <p>
+              <i class="fas fa-truck" style="color: #d63031;"></i>
+              {{ truck.truck_number }} - {{ truck.model }}
+            </p>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Legend Panel -->
+      <div class="filter-control">
+        <h4>Map Legend</h4>
+        <div class="d-flex align-items-center mb-2">
+          <img src="{% static 'img/firetruck.png' %}" style="width: 25px; height: 25px; margin-right: 10px;">
+          <span>Fire Station Location</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel - Map -->
+    <div class="col-md-9">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title">Fire Stations in Puerto Princesa</h4>
+        </div>
+        <div class="card-body">
+          <div id="map" style="width: 100%; height: 600px; border-radius: 5px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+  // Initialize map centered on Puerto Princesa
+  var map = L.map('map', {
+    zoomControl: false // We'll add zoom control to top-right
+  });
+
+  // Add OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
+  }).addTo(map);
+
+  // Add zoom control to top-right
+  L.control.zoom({
+    position: 'topright'
+  }).addTo(map);
+
+  // Custom firetruck icon
+  var truckIcon = L.icon({
+    iconUrl: "{% static 'img/firetruck.png' %}",
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+    popupAnchor: [0, -20],
+    className: 'firetruck-icon'
+  });
+
+  // Get stations data from Django context
+  var stations = {{ stations|safe }};
+
+  // Add markers for each fire station
+  var markers = [];
+  var bounds = L.latLngBounds();
+  
+  stations.forEach(function(station) {
+    var marker = L.marker([station.latitude, station.longitude], {
+      icon: truckIcon,
+      title: station.name,
+      riseOnHover: true
+    }).addTo(map);
+    
+    var popupContent = `
+      <div class="station-popup" style="min-width: 250px;">
+        <div class="station-header" style="border-bottom: 2px solid #d63031; margin-bottom: 10px; padding-bottom: 5px;">
+          <img src="{% static 'img/firetruck.png' %}" style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle;">
+          <h6 style="color: #d63031; margin: 0; display: inline-block; vertical-align: middle;">${station.name}</h6>
+        </div>
+        <div class="station-info">
+          <p style="margin-bottom: 8px;">
+            <strong><i class="fas fa-map-marker-alt" style="color: #d63031;"></i> Location:</strong><br>
+            ${station.address}
+          </p>
+          <p style="margin-bottom: 8px;">
+            <strong><i class="fas fa-phone" style="color: #d63031;"></i> Emergency Contact:</strong><br>
+            ${station.phone}
+          </p>
+          <p style="margin-bottom: 8px;">
+            <strong><i class="fas fa-shield-alt" style="color: #d63031;"></i> Coverage Area:</strong><br>
+            ${station.coverage}
+          </p>
+          <div class="trucks-info" style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+            <strong><i class="fas fa-truck" style="color: #d63031;"></i> Assigned Fire Trucks:</strong><br>
+            ${station.trucks.map(truck => `
+              <div style="margin: 5px 0; padding: 5px; background: #f8f9fa; border-radius: 4px;">
+                <div><strong>Truck #:</strong> ${truck.truck_number}</div>
+                <div><strong>Model:</strong> ${truck.model}</div>
+                <div><strong>Capacity:</strong> ${truck.capacity}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div style="font-size: 0.8em; color: #666; margin-top: 10px;">
+            <strong>GPS Coordinates:</strong><br>
+            ${station.latitude.toFixed(6)}, ${station.longitude.toFixed(6)}
+          </div>
+        </div>
+      </div>
+    `;
+    
+    marker.bindPopup(popupContent, {
+      maxWidth: 300,
+      className: 'station-popup'
+    });
+    
+    marker.on('mouseover', function() {
+      this.openPopup();
+    });
+
+    markers.push(marker);
+    bounds.extend([station.latitude, station.longitude]);
+  });
+
+  // Fit bounds with padding
+  if (markers.length > 0) {
+    map.fitBounds(bounds, {padding: [50, 50]});
+  } else {
+    // Default view if no stations
+    map.setView([9.81644, 118.72239], 13);
+  }
+
+  // Add scale control
+  L.control.scale({
+    imperial: false,
+    position: 'bottomright'
+  }).addTo(map);
+
+  // Make station cards interactive
+  document.querySelectorAll('.station-card').forEach(function(card, index) {
+    card.addEventListener('click', function() {
+      markers[index].openPopup();
+      map.panTo(markers[index].getLatLng());
+    });
+  });
+</script>
+
+<style>
+  .firetruck-icon {
+    transition: transform 0.3s ease;
+  }
+  
+  .firetruck-icon:hover {
+    transform: scale(1.2) !important;
+    z-index: 1000 !important;
+  }
+
+  .station-popup .leaflet-popup-content-wrapper {
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  }
+
+  .station-popup .leaflet-popup-content {
+    margin: 0;
+    padding: 10px;
+  }
+
+  .station-popup .leaflet-popup-tip {
+    background: white;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  }
+</style>
+{% endblock %}

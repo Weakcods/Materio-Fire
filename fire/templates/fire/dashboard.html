@@ -1,0 +1,432 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Fire Management Dashboard{% endblock title %}
+
+{% block vendor_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+{% endblock vendor_css %}
+
+{% block content %}
+<div class="row gy-6">
+  <!-- Overview Stats -->
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header">
+        <div class="d-flex align-items-center justify-content-between">
+          <h5 class="card-title m-0 me-2">Fire Management Overview</h5>
+          <div class="dropdown">
+            <button class="btn text-muted p-0" type="button" id="overviewDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="ri-more-2-line ri-24px"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="overviewDropdown">
+              <a class="dropdown-item" href="{% url 'fire:incident_list' %}">View All Incidents</a>
+              <a class="dropdown-item" href="{% url 'fire:station_list' %}">View All Stations</a>
+              <a class="dropdown-item" href="{% url 'fire:firefighter_list' %}">View All Firefighters</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body pt-lg-3">
+        <div class="row g-3">
+          <div class="col-md-3 col-6">
+            <div class="d-flex align-items-center">
+              <div class="avatar">
+                <div class="avatar-initial bg-danger rounded shadow-xs">
+                  <i class="ri-fire-line ri-24px"></i>
+                </div>
+              </div>
+              <div class="ms-3">
+                <p class="mb-0">Active Incidents</p>
+                <h5 class="mb-0">{{ active_incidents }}</h5>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="d-flex align-items-center">
+              <div class="avatar">
+                <div class="avatar-initial bg-primary rounded shadow-xs">
+                  <i class="ri-building-line ri-24px"></i>
+                </div>
+              </div>
+              <div class="ms-3">
+                <p class="mb-0">Fire Stations</p>
+                <h5 class="mb-0">{{ total_stations }}</h5>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="d-flex align-items-center">
+              <div class="avatar">
+                <div class="avatar-initial bg-success rounded shadow-xs">
+                  <i class="ri-user-line ri-24px"></i>
+                </div>
+              </div>
+              <div class="ms-3">
+                <p class="mb-0">Firefighters</p>
+                <h5 class="mb-0">{{ total_firefighters }}</h5>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6">
+            <div class="d-flex align-items-center">
+              <div class="avatar">
+                <div class="avatar-initial bg-warning rounded shadow-xs">
+                  <i class="ri-truck-line ri-24px"></i>
+                </div>
+              </div>
+              <div class="ms-3">
+                <p class="mb-0">Fire Trucks</p>
+                <h5 class="mb-0">{{ total_trucks }}</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weather Conditions -->
+  <div class="col-md-12 col-lg-4">
+    <div class="card">
+      <div class="card-body text-nowrap">
+        <h5 class="card-title mb-0">Weather Conditions</h5>
+        <p class="mb-2">Current Weather Status</p>
+        <div class="d-flex align-items-center mb-3">
+          <i class="ri-sun-line ri-2x me-2"></i>
+          <div>
+            <h4 class="mb-0">{{ weather.temperature }}°C</h4>
+            <p class="mb-0">{{ weather.condition }}</p>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between">
+          <div>
+            <p class="mb-1">Humidity</p>
+            <h6 class="mb-0">{{ weather.humidity }}%</h6>
+          </div>
+          <div>
+            <p class="mb-1">Wind Speed</p>
+            <h6 class="mb-0">{{ weather.wind_speed }} km/h</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Incidents -->
+  <div class="col-xl-4 col-md-6">
+    <div class="card">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="card-title m-0 me-2">Recent Incidents</h5>
+        <div class="dropdown">
+          <button class="btn text-muted p-0" type="button" id="recentIncidents" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-more-2-line ri-24px"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="recentIncidents">
+            <a class="dropdown-item" href="{% url 'fire:incident_list' %}">View All</a>
+            <a class="dropdown-item" href="{% url 'fire:incident_create' %}">New Incident</a>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <ul class="p-0 m-0">
+          {% for incident in recent_incidents %}
+          <li class="d-flex mb-4 pb-2">
+            <div class="me-3">
+              <div class="avatar">
+                <div class="avatar-initial bg-label-{% if incident.severity_level == 'HIGH' %}danger{% elif incident.severity_level == 'MEDIUM' %}warning{% else %}info{% endif %} rounded-circle">
+                  <i class="ri-fire-line"></i>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <div class="me-2">
+                <h6 class="mb-0">{{ incident.location.name }}</h6>
+                <small>{{ incident.date_time|date:"M d, Y H:i" }}</small>
+              </div>
+              <div class="user-progress">
+                <span class="badge bg-label-{% if incident.severity_level == 'HIGH' %}danger{% elif incident.severity_level == 'MEDIUM' %}warning{% else %}info{% endif %}">
+                  {{ incident.get_severity_level_display }}
+                </span>
+              </div>
+            </div>
+          </li>
+          {% empty %}
+          <li class="text-center py-4">
+            <p class="mb-0 text-muted">No recent incidents</p>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fire Stations Map -->
+  <div class="col-xl-8 col-md-6">
+    <div class="card">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="card-title m-0 me-2">Fire Stations Map</h5>
+        <div class="dropdown">
+          <button class="btn text-muted p-0" type="button" id="stationsMap" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-more-2-line ri-24px"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="stationsMap">
+            <a class="dropdown-item" href="{% url 'fire:stations_map' %}">View Full Map</a>
+            <a class="dropdown-item" href="{% url 'fire:station_create' %}">Add Station</a>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="stationsMap" style="height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incident Statistics -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title">Incident Statistics</h5>
+      </div>
+      <div class="card-body">
+        <div id="incidentStatsChart" style="height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fire Station Statistics -->
+  <div class="col-xl-6 col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title">Fire Station Statistics</h5>
+      </div>
+      <div class="card-body">
+        <div id="stationStatsChart" style="height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firefighter Distribution -->
+  <div class="col-xl-6 col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title">Firefighter Distribution</h5>
+      </div>
+      <div class="card-body">
+        <div id="firefighterStatsChart" style="height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Fire Trucks -->
+  <div class="col-xl-6 col-md-6">
+    <div class="card">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="card-title m-0 me-2">Recent Fire Trucks</h5>
+        <div class="dropdown">
+          <button class="btn text-muted p-0" type="button" id="recentTrucks" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-more-2-line ri-24px"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="recentTrucks">
+            <a class="dropdown-item" href="{% url 'fire:truck_list' %}">View All</a>
+            <a class="dropdown-item" href="{% url 'fire:truck_create' %}">Add Truck</a>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <ul class="p-0 m-0">
+          {% for truck in recent_trucks %}
+          <li class="d-flex mb-4 pb-2">
+            <div class="me-3">
+              <div class="avatar">
+                <div class="avatar-initial bg-label-{% if truck.status == 'ACTIVE' %}success{% elif truck.status == 'MAINTENANCE' %}warning{% else %}danger{% endif %} rounded-circle">
+                  <i class="ri-truck-line"></i>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <div class="me-2">
+                <h6 class="mb-0">{{ truck.truck_number }}</h6>
+                <small>{{ truck.station.name }}</small>
+              </div>
+              <div class="user-progress">
+                <span class="badge bg-label-{% if truck.status == 'ACTIVE' %}success{% elif truck.status == 'MAINTENANCE' %}warning{% else %}danger{% endif %}">
+                  {{ truck.get_status_display }}
+                </span>
+              </div>
+            </div>
+          </li>
+          {% empty %}
+          <li class="text-center py-4">
+            <p class="mb-0 text-muted">No fire trucks available</p>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Firefighters -->
+  <div class="col-xl-6 col-md-6">
+    <div class="card">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="card-title m-0 me-2">Recent Firefighters</h5>
+        <div class="dropdown">
+          <button class="btn text-muted p-0" type="button" id="recentFirefighters" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-more-2-line ri-24px"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="recentFirefighters">
+            <a class="dropdown-item" href="{% url 'fire:firefighter_list' %}">View All</a>
+            <a class="dropdown-item" href="{% url 'fire:firefighter_create' %}">Add Firefighter</a>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <ul class="p-0 m-0">
+          {% for firefighter in recent_firefighters %}
+          <li class="d-flex mb-4 pb-2">
+            <div class="me-3">
+              <div class="avatar">
+                <div class="avatar-initial bg-label-primary rounded-circle">
+                  <i class="ri-user-line"></i>
+                </div>
+              </div>
+            </div>
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <div class="me-2">
+                <h6 class="mb-0">{{ firefighter.name }}</h6>
+                <small>{{ firefighter.station.name }}</small>
+              </div>
+              <div class="user-progress">
+                <span class="badge bg-label-primary">
+                  {{ firefighter.rank }}
+                </span>
+              </div>
+            </div>
+          </li>
+          {% empty %}
+          <li class="text-center py-4">
+            <p class="mb-0 text-muted">No firefighters available</p>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block vendor_js %}
+{{ block.super }}
+<script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize Stations Map
+  const stationsMap = L.map('stationsMap').setView([0, 0], 2);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(stationsMap);
+
+  // Add station markers
+  {% for station in stations %}
+  L.marker([{{ station.latitude }}, {{ station.longitude }}])
+    .bindPopup('<b>{{ station.name }}</b><br>{{ station.address }}')
+    .addTo(stationsMap);
+  {% endfor %}
+
+  // Initialize Incident Statistics Chart
+  const incidentStatsChartEl = document.querySelector('#incidentStatsChart');
+  const incidentStatsChartConfig = {
+    chart: {
+      height: 300,
+      type: 'bar',
+      toolbar: {
+        show: false
+      }
+    },
+    plotOptions: {
+      bar: {
+        borderRadius: 8,
+        columnWidth: '30%'
+      }
+    },
+    series: [{
+      name: 'Incidents',
+      data: [
+        {% for stat in incident_stats %}
+          {{ stat.count }}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ]
+    }],
+    xaxis: {
+      categories: [
+        {% for stat in incident_stats %}
+          '{{ stat.severity_level }}'{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ]
+    }
+  };
+
+  const incidentStatsChart = new ApexCharts(incidentStatsChartEl, incidentStatsChartConfig);
+  incidentStatsChart.render();
+
+  // Initialize Station Statistics Chart
+  const stationStatsChartEl = document.querySelector('#stationStatsChart');
+  const stationStatsChartConfig = {
+    chart: {
+      height: 300,
+      type: 'donut',
+      toolbar: {
+        show: false
+      }
+    },
+    labels: [
+      {% for stat in station_stats %}
+        '{{ stat.name }}'{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ],
+    series: [
+      {% for stat in station_stats %}
+        {{ stat.firefighters_count }}{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  };
+
+  const stationStatsChart = new ApexCharts(stationStatsChartEl, stationStatsChartConfig);
+  stationStatsChart.render();
+
+  // Initialize Firefighter Distribution Chart
+  const firefighterStatsChartEl = document.querySelector('#firefighterStatsChart');
+  const firefighterStatsChartConfig = {
+    chart: {
+      height: 300,
+      type: 'pie',
+      toolbar: {
+        show: false
+      }
+    },
+    labels: [
+      {% for stat in firefighter_stats %}
+        '{{ stat.rank }}'{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ],
+    series: [
+      {% for stat in firefighter_stats %}
+        {{ stat.count }}{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  };
+
+  const firefighterStatsChart = new ApexCharts(firefighterStatsChartEl, firefighterStatsChartConfig);
+  firefighterStatsChart.render();
+});
+</script>
+{% endblock page_js %} 

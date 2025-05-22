@@ -1,0 +1,100 @@
+{% extends 'fire/base.html' %}
+
+{% block title %}Fire Incidents Map{% endblock %}
+
+{% block fire_content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title m-0">Fire Incidents Map</h5>
+        <div class="d-flex gap-2">
+            <a href="{% url 'map_station' %}" class="btn btn-outline-primary">
+                <i class="ti ti-building me-1"></i>
+                View Stations
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="map" style="height: 600px;"></div>
+    </div>
+</div>
+
+<!-- Incident Details Modal -->
+<div class="modal fade" id="incidentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="incidentSeverity"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <h6 class="fw-semibold">Description</h6>
+                    <p id="incidentDescription" class="mb-0"></p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="fw-semibold">Date & Time</h6>
+                    <p id="incidentDateTime" class="mb-0"></p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="fw-semibold">Location</h6>
+                    <p id="incidentLocation" class="mb-0"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block fire_js %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize map
+        const map = L.map('map').setView([14.5995, 120.9842], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // Add markers for incidents
+        const incidents = {{ incidents|safe }};
+        incidents.forEach(incident => {
+            // Set marker color based on severity
+            let color = '#ff6384'; // Default color for Minor Fire
+            if (incident.severity === 'Moderate Fire') {
+                color = '#ffce56';
+            } else if (incident.severity === 'Major Fire') {
+                color = '#ff0000';
+            }
+
+            const marker = L.circleMarker([incident.latitude, incident.longitude], {
+                radius: 8,
+                color: color,
+                fillColor: color,
+                fillOpacity: 0.5
+            })
+            .bindPopup(`
+                <b>${incident.severity}</b><br>
+                ${incident.description}<br>
+                <button class="btn btn-sm btn-primary mt-2" onclick="showIncidentDetails('${incident.severity}')">
+                    View Details
+                </button>
+            `)
+            .addTo(map);
+        });
+
+        // Function to show incident details in modal
+        window.showIncidentDetails = function(severity) {
+            const incident = incidents.find(i => i.severity === severity);
+            if (incident) {
+                document.getElementById('incidentSeverity').textContent = incident.severity;
+                document.getElementById('incidentDescription').textContent = incident.description;
+                document.getElementById('incidentDateTime').textContent = incident.date_time;
+                document.getElementById('incidentLocation').textContent = incident.address;
+
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById('incidentModal'));
+                modal.show();
+            }
+        };
+    });
+</script>
+{% endblock %} 

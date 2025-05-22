@@ -1,0 +1,178 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Firefighters{% endblock title %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Firefighters</h5>
+          <a href="{% url 'fire:firefighter_create' %}" class="btn btn-primary">
+            <i class="ri-add-line me-1"></i>Add Firefighter
+          </a>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Rank</th>
+                  <th>Station</th>
+                  <th>Contact</th>
+                  <th>Email</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for firefighter in firefighters %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="avatar avatar-sm me-2">
+                        <div class="avatar-initial bg-label-success rounded">
+                          <i class="ri-user-line"></i>
+                        </div>
+                      </div>
+                      <span class="fw-medium">{{ firefighter.name }}</span>
+                    </div>
+                  </td>
+                  <td>{{ firefighter.rank }}</td>
+                  <td>
+                    <span class="badge bg-label-primary">{{ firefighter.station.name }}</span>
+                  </td>
+                  <td>{{ firefighter.contact_number }}</td>
+                  <td>{{ firefighter.email }}</td>
+                  <td>
+                    <span class="badge bg-label-{% if firefighter.status == 'ACTIVE' %}success{% else %}warning{% endif %}">
+                      {{ firefighter.get_status_display }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="dropdown">
+                      <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                        <i class="ri-more-2-fill"></i>
+                      </button>
+                      <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{% url 'fire:firefighter_update' firefighter.pk %}">
+                          <i class="ri-edit-box-line me-2"></i>Edit
+                        </a>
+                        <a class="dropdown-item" href="{% url 'fire:firefighter_delete' firefighter.pk %}">
+                          <i class="ri-delete-bin-line me-2"></i>Delete
+                        </a>
+                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#viewFirefighterModal" data-firefighter-id="{{ firefighter.pk }}">
+                          <i class="ri-eye-line me-2"></i>View Details
+                        </a>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="7" class="text-center py-4">
+                    <p class="mb-0 text-muted">No firefighters found</p>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Firefighter Modal -->
+<div class="modal fade" id="viewFirefighterModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Firefighter Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Firefighter details will be loaded here -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block page_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize View Firefighter Modal
+  const viewFirefighterModal = document.getElementById('viewFirefighterModal');
+  if (viewFirefighterModal) {
+    viewFirefighterModal.addEventListener('show.bs.modal', function(event) {
+      const button = event.relatedTarget;
+      const firefighterId = button.getAttribute('data-firefighter-id');
+      const modalBody = this.querySelector('.modal-body');
+      
+      // Fetch firefighter details
+      fetch(`/api/firefighters/${firefighterId}/`)
+        .then(response => response.json())
+        .then(data => {
+          modalBody.innerHTML = `
+            <div class="row">
+              <div class="col-12 mb-4">
+                <h6>Personal Information</h6>
+                <p class="mb-1"><strong>Name:</strong> ${data.name}</p>
+                <p class="mb-1"><strong>Rank:</strong> ${data.rank}</p>
+                <p class="mb-1"><strong>Station:</strong> ${data.station.name}</p>
+                <p class="mb-1"><strong>Contact:</strong> ${data.contact_number}</p>
+                <p class="mb-1"><strong>Email:</strong> ${data.email}</p>
+                <p class="mb-1"><strong>Status:</strong> 
+                  <span class="badge bg-label-${data.status === 'ACTIVE' ? 'success' : 'warning'}">
+                    ${data.status}
+                  </span>
+                </p>
+              </div>
+              <div class="col-12">
+                <h6>Recent Incidents</h6>
+                <div class="table-responsive">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Location</th>
+                        <th>Severity</th>
+                        <th>Status</th>
+                        <th>Date/Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${data.recent_incidents.map(incident => `
+                        <tr>
+                          <td>${incident.location.name}</td>
+                          <td>
+                            <span class="badge bg-label-${incident.severity === 'HIGH' ? 'danger' : incident.severity === 'MEDIUM' ? 'warning' : 'info'}">
+                              ${incident.severity}
+                            </span>
+                          </td>
+                          <td>
+                            <span class="badge bg-label-${incident.status === 'ACTIVE' ? 'danger' : incident.status === 'RESOLVED' ? 'success' : 'warning'}">
+                              ${incident.status}
+                            </span>
+                          </td>
+                          <td>${new Date(incident.date_time).toLocaleString()}</td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+    });
+  }
+});
+</script>
+{% endblock page_js %} 

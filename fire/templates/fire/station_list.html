@@ -1,0 +1,184 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Fire Stations{% endblock title %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Fire Stations</h5>
+          <a href="{% url 'fire:station_create' %}" class="btn btn-primary">
+            <i class="ri-add-line me-1"></i>Add Station
+          </a>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Address</th>
+                  <th>Contact</th>
+                  <th>Firefighters</th>
+                  <th>Trucks</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for station in stations %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="avatar avatar-sm me-2">
+                        <div class="avatar-initial bg-label-primary rounded">
+                          <i class="ri-building-line"></i>
+                        </div>
+                      </div>
+                      <span class="fw-medium">{{ station.name }}</span>
+                    </div>
+                  </td>
+                  <td>{{ station.address }}</td>
+                  <td>{{ station.contact_number }}</td>
+                  <td>
+                    <span class="badge bg-label-info">{{ station.firefighters.count }}</span>
+                  </td>
+                  <td>
+                    <span class="badge bg-label-warning">{{ station.firetrucks.count }}</span>
+                  </td>
+                  <td>
+                    <div class="dropdown">
+                      <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                        <i class="ri-more-2-fill"></i>
+                      </button>
+                      <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{% url 'fire:station_update' station.pk %}">
+                          <i class="ri-edit-box-line me-2"></i>Edit
+                        </a>
+                        <a class="dropdown-item" href="{% url 'fire:station_delete' station.pk %}">
+                          <i class="ri-delete-bin-line me-2"></i>Delete
+                        </a>
+                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#viewStationModal" data-station-id="{{ station.pk }}">
+                          <i class="ri-eye-line me-2"></i>View Details
+                        </a>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center py-4">
+                    <p class="mb-0 text-muted">No fire stations found</p>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Station Modal -->
+<div class="modal fade" id="viewStationModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Station Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Station details will be loaded here -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block page_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize View Station Modal
+  const viewStationModal = document.getElementById('viewStationModal');
+  if (viewStationModal) {
+    viewStationModal.addEventListener('show.bs.modal', function(event) {
+      const button = event.relatedTarget;
+      const stationId = button.getAttribute('data-station-id');
+      const modalBody = this.querySelector('.modal-body');
+      
+      // Fetch station details
+      fetch(`/api/stations/${stationId}/`)
+        .then(response => response.json())
+        .then(data => {
+          modalBody.innerHTML = `
+            <div class="row">
+              <div class="col-12 mb-4">
+                <h6>${data.name}</h6>
+                <p class="mb-1">Address: ${data.address}</p>
+                <p class="mb-1">Contact: ${data.contact_number}</p>
+                <p class="mb-1">Location: ${data.latitude}, ${data.longitude}</p>
+              </div>
+              <div class="col-md-6">
+                <h6>Firefighters</h6>
+                <div class="table-responsive">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Rank</th>
+                        <th>Contact</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${data.firefighters.map(firefighter => `
+                        <tr>
+                          <td>${firefighter.name}</td>
+                          <td>${firefighter.rank}</td>
+                          <td>${firefighter.contact_number}</td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h6>Fire Trucks</h6>
+                <div class="table-responsive">
+                  <table class="table table-sm">
+                    <thead>
+                      <tr>
+                        <th>Vehicle #</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${data.firetrucks.map(truck => `
+                        <tr>
+                          <td>${truck.vehicle_number}</td>
+                          <td>${truck.type}</td>
+                          <td>
+                            <span class="badge bg-label-${truck.status === 'ACTIVE' ? 'success' : 'warning'}">
+                              ${truck.status}
+                            </span>
+                          </td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+    });
+  }
+});
+</script>
+{% endblock page_js %} 

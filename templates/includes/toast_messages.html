@@ -1,0 +1,97 @@
+{% if messages %}
+<div class="position-fixed bottom-0 right-0 p-3" style="z-index: 9999; right: 0; bottom: 0;">
+    {% for message in messages %}
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+        <div class="toast-header {% if message.tags %}bg-{{ message.tags }}{% endif %} text-white">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-info-circle{% endif %} mr-2"></i>
+            <strong class="mr-auto">{{ message.tags|title }}</strong>
+            <button type="button" class="ml-2 mb-1 close text-white" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body bg-white">
+            {{ message }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.toast {
+    min-width: 300px;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-bottom: 1rem;
+}
+
+.toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast-header {
+    border-radius: 8px 8px 0 0;
+    padding: 12px;
+}
+
+.toast-body {
+    padding: 12px;
+    font-size: 14px;
+}
+
+.bg-success {
+    background-color: #2dce89 !important;
+}
+
+.bg-error {
+    background-color: #f5365c !important;
+}
+
+.bg-warning {
+    background-color: #fb6340 !important;
+}
+
+.bg-info {
+    background-color: #11cdef !important;
+}
+
+.toast-header strong {
+    font-size: 14px;
+}
+
+.toast .close {
+    text-shadow: none;
+    opacity: 1;
+}
+</style>
+
+<script>
+$(document).ready(function(){
+    // Initialize toasts with animation
+    $('.toast').each(function(index){
+        var $toast = $(this);
+        setTimeout(function(){
+            $toast.toast('show');
+        }, index * 200);
+    });
+
+    // Auto-hide toasts after 5 seconds
+    $('.toast').toast({
+        delay: 5000,
+        animation: true
+    });
+
+    // Add sound effect for success messages
+    $('.toast').on('show.bs.toast', function () {
+        if ($(this).find('.toast-header').hasClass('bg-success')) {
+            var audio = new Audio("{% static 'audio/success.mp3' %}");
+            audio.volume = 0.5;
+            audio.play();
+        }
+    });
+});
+</script>

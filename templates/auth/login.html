@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}FireApp - Login{% endblock %}
+
+{% block auth_content %}
+<div class="container min-vh-100 d-flex align-items-center justify-content-center">
+    <div class="col-12 col-md-8 col-lg-5">
+        <div class="card overflow-hidden border-0 shadow-lg">
+            <div class="card-header bg-primary py-4">
+                <div class="text-center">
+                    <img src="{% static 'img/icon.svg' %}" alt="FireApp Logo" width="80" class="mb-3">
+                    <h4 class="text-white font-weight-bold mb-0">Welcome to FireApp</h4>
+                    <p class="text-white-50 mb-0">Please sign in to continue</p>
+                </div>
+            </div>
+            <div class="card-body p-4">                {% if messages %}
+                <div class="toast-container">
+                    {% for message in messages %}
+                    <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true">
+                        <div class="toast-header {% if message.tags %}bg-{{ message.tags }}{% endif %} text-white">
+                            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-info-circle{% endif %}"></i>
+                            <strong>{{ message.tags|title }}</strong>
+                            <button type="button" class="close text-white" onclick="this.closest('.toast').remove()" aria-label="Close">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="toast-body">
+                            {{ message }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                  <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <div class="form-group mb-4">
+                        <label for="username" class="form-label text-dark"><i class="fas fa-user mr-2"></i>Username</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary border-primary text-white">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                            </div>
+                            <input id="username" name="username" type="text" 
+                                   class="form-control border-primary" 
+                                   placeholder="Enter your username" required>
+                        </div>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="password" class="form-label text-dark"><i class="fas fa-lock mr-2"></i>Password</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary border-primary text-white">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                            </div>
+                            <input id="password" name="password" type="password" 
+                                   class="form-control border-primary" 
+                                   placeholder="Enter your password" required>                            <div class="input-group-append">
+                                <button type="button" class="input-group-text bg-primary border-primary text-white show-password" 
+                                        data-tooltip="Show/Hide Password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mb-4 d-flex justify-content-between align-items-center">
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" name="rememberme" id="rememberme">
+                            <label class="custom-control-label text-dark" for="rememberme">
+                                Remember Me
+                            </label>
+                        </div>
+                        <a href="#" class="text-primary">Forgot Password?</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block btn-lg mb-4 shadow-lg">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                    </button>
+                    <div class="text-center">
+                        <p class="text-muted mb-0">Don't have an account?</p>
+                        <a href="#" class="text-primary font-weight-bold">
+                            Contact Administrator <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

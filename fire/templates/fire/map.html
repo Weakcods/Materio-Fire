@@ -1,0 +1,116 @@
+{% extends 'fire/base.html' %}
+
+{% block title %}Fire Stations Map{% endblock %}
+
+{% block fire_content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title m-0">Fire Stations Map</h5>
+        <div class="d-flex gap-2">
+            <a href="{% url 'incidents_map' %}" class="btn btn-outline-primary">
+                <i class="ti ti-alert-circle me-1"></i>
+                View Incidents
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="map" style="height: 600px;"></div>
+    </div>
+</div>
+
+<!-- Station Details Modal -->
+<div class="modal fade" id="stationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="stationName"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <h6 class="fw-semibold">Address</h6>
+                    <p id="stationAddress" class="mb-0"></p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="fw-semibold">Coverage Area</h6>
+                    <p id="stationCoverage" class="mb-0"></p>
+                </div>
+                <div class="mb-3">
+                    <h6 class="fw-semibold">Contact</h6>
+                    <p id="stationPhone" class="mb-0"></p>
+                </div>
+                <div>
+                    <h6 class="fw-semibold">Available Trucks</h6>
+                    <div id="stationTrucks" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Truck Number</th>
+                                    <th>Model</th>
+                                    <th>Capacity</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trucksList">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block fire_js %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize map
+        const map = L.map('map').setView([14.5995, 120.9842], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // Add markers for stations
+        const stations = {{ stations|safe }};
+        stations.forEach(station => {
+            const marker = L.marker([station.latitude, station.longitude])
+                .bindPopup(`
+                    <b>${station.name}</b><br>
+                    ${station.address}<br>
+                    <button class="btn btn-sm btn-primary mt-2" onclick="showStationDetails('${station.name}')">
+                        View Details
+                    </button>
+                `)
+                .addTo(map);
+        });
+
+        // Function to show station details in modal
+        window.showStationDetails = function(stationName) {
+            const station = stations.find(s => s.name === stationName);
+            if (station) {
+                document.getElementById('stationName').textContent = station.name;
+                document.getElementById('stationAddress').textContent = station.address;
+                document.getElementById('stationCoverage').textContent = station.coverage;
+                document.getElementById('stationPhone').textContent = station.phone;
+
+                // Clear and populate trucks table
+                const trucksList = document.getElementById('trucksList');
+                trucksList.innerHTML = '';
+                station.trucks.forEach(truck => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${truck.truck_number}</td>
+                        <td>${truck.model}</td>
+                        <td>${truck.capacity}</td>
+                    `;
+                    trucksList.appendChild(row);
+                });
+
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById('stationModal'));
+                modal.show();
+            }
+        };
+    });
+</script>
+{% endblock %} 

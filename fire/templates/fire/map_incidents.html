@@ -1,0 +1,86 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Fire Incidents Map - Fire Management System{% endblock %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">Fire Incidents Map</h5>
+            <a href="{% url 'fire:incident_list' %}" class="btn btn-primary btn-sm">View List</a>
+        </div>
+        <div class="card-body">
+            <div id="map" style="height: 600px;"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script>
+    // Initialize the map
+    var map = L.map('map').setView([14.5995, 120.9842], 11); // Manila coordinates
+
+    // Add the OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Define custom icons for different severity levels
+    var severityIcons = {
+        'High': L.divIcon({
+            className: 'custom-div-icon',
+            html: '<div style="background-color: #dc3545; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        }),
+        'Medium': L.divIcon({
+            className: 'custom-div-icon',
+            html: '<div style="background-color: #ffc107; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        }),
+        'Low': L.divIcon({
+            className: 'custom-div-icon',
+            html: '<div style="background-color: #28a745; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white;"></div>',
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        })
+    };
+
+    // Add markers for each incident
+    {% for incident in incidents %}
+    var marker = L.marker(
+        [{{ incident.location.latitude }}, {{ incident.location.longitude }}],
+        {icon: severityIcons['{{ incident.severity }}']}
+    ).addTo(map);
+    
+    marker.bindPopup(`
+        <strong>Incident Details</strong><br>
+        Location: {{ incident.location.name }}<br>
+        Severity: {{ incident.severity }}<br>
+        Status: {{ incident.status }}<br>
+        Date/Time: {{ incident.date_time|date:"M d, Y H:i" }}<br>
+        Description: {{ incident.description }}
+    `);
+    {% endfor %}
+
+    // Add legend
+    var legend = L.control({position: 'bottomright'});
+    legend.onAdd = function(map) {
+        var div = L.DomUtil.create('div', 'info legend');
+        div.style.backgroundColor = 'white';
+        div.style.padding = '10px';
+        div.style.borderRadius = '5px';
+        div.innerHTML = '<h4>Severity</h4>' +
+            '<div><span style="display: inline-block; width: 12px; height: 12px; background-color: #dc3545; border-radius: 50%; margin-right: 5px;"></span> High</div>' +
+            '<div><span style="display: inline-block; width: 12px; height: 12px; background-color: #ffc107; border-radius: 50%; margin-right: 5px;"></span> Medium</div>' +
+            '<div><span style="display: inline-block; width: 12px; height: 12px; background-color: #28a745; border-radius: 50%; margin-right: 5px;"></span> Low</div>';
+        return div;
+    };
+    legend.addTo(map);
+</script>
+{% endblock %} 

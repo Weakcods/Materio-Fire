@@ -1,0 +1,182 @@
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+  <!-- ! Hide app brand if navbar-full -->
+  {% if not navbar_full %}
+  <div class="app-brand demo">
+    <a href="{% url 'fire:dashboard' %}" class="app-brand-link">
+      <span class="app-brand-logo demo me-1">
+        {% include 'partials/logo.html' %}
+      </span>
+      <span class="app-brand-text demo menu-text fw-semibold ms-2">Fire Management</span>
+    </a>
+
+    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+      <i class="menu-toggle-icon d-xl-block align-middle"></i>
+    </a>
+  </div>
+  {% endif %}
+
+  <div class="menu-inner-shadow"></div>
+
+  <ul class="menu-inner py-1">
+    <!-- Dashboards -->
+    <li class="menu-item {% if 'dashboard' == request.resolver_match.url_name %}active{% endif %}">
+      <a href="{% url 'fire:dashboard' %}" class="menu-link d-flex align-items-center">
+        <div class="d-flex align-items-center">
+          <i class="menu-icon tf-icons ri-home-smile-line"></i>
+          <div class="menu-text text-truncate ms-2" data-i18n="Dashboard">Dashboard</div>
+        </div>
+      </a>
+    </li>
+
+    <!-- Fire Management -->
+    <li class="menu-header fw-medium mt-7">
+      <span class="menu-header-text">Fire Management</span>
+    </li>
+
+    <!-- Incidents -->
+    <li class="menu-item {% if 'incident' in request.resolver_match.url_name %}active{% endif %}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle d-flex align-items-center">
+        <div class="d-flex align-items-center">
+          <i class="menu-icon tf-icons ri-fire-line"></i>
+          <div class="menu-text text-truncate ms-2" data-i18n="Incidents">Incidents</div>
+        </div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item {% if 'incident_list' == request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'fire:incident_list' %}" class="menu-link">
+            <div class="text-truncate" data-i18n="All Incidents">All Incidents</div>
+          </a>
+        </li>
+        <li class="menu-item {% if 'incident_create' == request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'fire:incident_create' %}" class="menu-link">
+            <div class="text-truncate" data-i18n="New Incident">New Incident</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- Fire Stations -->
+    <li class="menu-item {% if 'station' in request.resolver_match.url_name %}active{% endif %}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle d-flex align-items-center">
+        <div class="d-flex align-items-center">
+          <i class="menu-icon tf-icons ri-building-line"></i>
+          <div class="menu-text text-truncate ms-2" data-i18n="Fire Stations">Fire Stations</div>
+        </div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item {% if 'station_list' == request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'fire:station_list' %}" class="menu-link">
+            <div class="text-truncate" data-i18n="All Stations">All Stations</div>
+          </a>
+        </li>
+        <li class="menu-item {% if 'station_create' == request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'fire:station_create' %}" class="menu-link">
+            <div class="text-truncate" data-i18n="New Station">New Station</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- Firefighters -->
+    <li class="menu-item {% if 'firefighter' in request.resolver_match.url_name %}active{% endif %}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle d-flex align-items-center">
+        <div class="d-flex align-items-center">
+          <i class="menu-icon tf-icons ri-user-line"></i>
+          <div class="menu-text text-truncate ms-2" data-i18n="Firefighters">Firefighters</div>
+        </div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item {% if 'firefighter_list' == request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'fire:firefighter_list' %}" class="menu-link">
+            <div class="text-truncate" data-i18n="All Firefighters">All Firefighters</div>
+          </a>
+        </li>
+        <li class="menu-item {% if 'firefighter_create' == request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'fire:firefighter_create' %}" class="menu-link">
+            <div class="text-truncate" data-i18n="New Firefighter">New Firefighter</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- Fire Trucks -->
+    <li class="menu-item {% if 'truck' in request.resolver_match.url_name %}active{% endif %}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle d-flex align-items-center">
+        <div class="d-flex align-items-center">
+          <i class="menu-icon tf-icons ri-truck-line"></i>
+          <div class="menu-text text-truncate ms-2" data-i18n="Fire Trucks">Fire Trucks</div>
+        </div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item {% if 'truck_list' == request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'fire:truck_list' %}" class="menu-link">
+            <div class="text-truncate" data-i18n="All Trucks">All Trucks</div>
+          </a>
+        </li>
+        <li class="menu-item {% if 'truck_create' == request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'fire:truck_create' %}" class="menu-link">
+            <div class="text-truncate" data-i18n="New Truck">New Truck</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- Maps -->
+    <li class="menu-item {% if 'map' in request.resolver_match.url_name %}active{% endif %}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle d-flex align-items-center">
+        <div class="d-flex align-items-center">
+          <i class="menu-icon tf-icons ri-map-pin-line"></i>
+          <div class="menu-text text-truncate ms-2" data-i18n="Maps">Maps</div>
+        </div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item {% if 'stations_map' == request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'fire:stations_map' %}" class="menu-link">
+            <div class="text-truncate" data-i18n="Stations Map">Stations Map</div>
+          </a>
+        </li>
+        <li class="menu-item {% if 'incidents_map' == request.resolver_match.url_name %}active{% endif %}">
+          <a href="{% url 'fire:incidents_map' %}" class="menu-link">
+            <div class="text-truncate" data-i18n="Incidents Map">Incidents Map</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- Account Settings -->
+    <li class="menu-header fw-medium mt-7">
+      <span class="menu-header-text">Account</span>
+    </li>
+
+    <li class="menu-item {% if '/account_settings/' in request.path %}active{% endif %}">
+      <a href="#" class="menu-link d-flex align-items-center">
+        <div class="d-flex align-items-center">
+          <i class="menu-icon tf-icons ri-user-line"></i>
+          <div class="menu-text text-truncate ms-2" data-i18n="Account Settings">Account Settings</div>
+        </div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item {% if '/account/' in request.path %}active{% endif %}">
+          <a href="{% url 'pages-account-settings-account' %}" class="menu-link">
+            <div class="text-truncate" data-i18n="Account">Account</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/notifications/' in request.path %}active{% endif %}">
+          <a href="{% url 'pages-account-settings-notifications' %}" class="menu-link">
+            <div class="text-truncate" data-i18n="Notifications">Notifications</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+    <!-- Logout -->
+    <li class="menu-item">
+      <a href="{% url 'fire:logout' %}" class="menu-link d-flex align-items-center">
+        <div class="d-flex align-items-center">
+          <i class="menu-icon tf-icons ri-logout-box-line"></i>
+          <div class="menu-text text-truncate ms-2" data-i18n="Logout">Logout</div>
+        </div>
+      </a>
+    </li>
+  </ul>
+</aside>
