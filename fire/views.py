@@ -70,7 +70,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         
         # Weather data
         try:
-            context['weather'] = WeatherConditions.objects.latest('timestamp')
+            context['weather'] = WeatherConditions.objects.latest('created_at')
         except WeatherConditions.DoesNotExist:
             context['weather'] = {
                 'temperature': 0,
@@ -84,9 +84,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             count=Count('id')
         ).order_by('severity_level')
         
-        context['station_stats'] = FireStation.objects.annotate(
-            firefighters_count=Count('firefighters')
-        ).values('name', 'firefighters_count')
+        # Get station statistics by counting firefighters assigned to each station
+        station_stats = []
+        for station in FireStation.objects.all():
+            firefighter_count = Firefighters.objects.filter(station=station.name).count()
+            station_stats.append({
+                'name': station.name,
+                'firefighters_count': firefighter_count
+            })
+        context['station_stats'] = station_stats
         
         context['firefighter_stats'] = Firefighters.objects.values('rank').annotate(
             count=Count('id')
@@ -398,20 +404,28 @@ def incident_statistics(request):
 def station_statistics(request):
     total_stations = FireStation.objects.count()
     total_firefighters = Firefighters.objects.count()
-    firefighters_by_station = Firefighters.objects.values('station__name').annotate(count=Count('id'))
+    
+    # Count firefighters by station name
+    firefighters_by_station = []
+    for station in FireStation.objects.all():
+        count = Firefighters.objects.filter(station=station.name).count()
+        firefighters_by_station.append({
+            'station_name': station.name,
+            'count': count
+        })
     
     return JsonResponse({
         'total_stations': total_stations,
         'total_firefighters': total_firefighters,
-        'firefighters_by_station': list(firefighters_by_station)
+        'firefighters_by_station': firefighters_by_station
     })
 
 @login_required
 def weather_statistics(request):
-    weather_data = WeatherConditions.objects.select_related('location').order_by('-date_time')[:24]
+    weather_data = WeatherConditions.objects.select_related('incident').order_by('-created_at')[:24]
     return JsonResponse({
         'weather_data': list(weather_data.values(
-            'location__name', 'temperature', 'humidity', 'wind_speed', 'wind_direction', 'precipitation', 'date_time'
+            'incident__location__name', 'temperature', 'humidity', 'wind_speed', 'wind_direction', 'precipitation', 'created_at'
         ))
     })
 
@@ -516,12 +530,12 @@ def truck_detail(request, pk):
 
 @login_required
 def weather_data(request):
-    weather = WeatherConditions.objects.latest('timestamp')
+    weather = WeatherConditions.objects.latest('created_at')
     data = {
         'temperature': weather.temperature,
         'humidity': weather.humidity,
         'wind_speed': weather.wind_speed,
         'wind_direction': weather.wind_direction,
-        'timestamp': weather.timestamp,
+        'timestamp': weather.created_at,
     }
     return JsonResponse(data)
