@@ -113,60 +113,6 @@
         </div>
     </div>
 
-    <!-- Charts Section -->
-    <div class="row mb-4">
-        <!-- Incident Trends Chart -->
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Incident Trends</h5>
-                    <div class="d-flex gap-2">
-                        <select class="form-select form-select-sm" id="trendTimeRange">
-                            <option value="week">Last Week</option>
-                            <option value="month" selected>Last Month</option>
-                            <option value="year">Last Year</option>
-                        </select>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="ri-bar-chart-line me-1"></i>
-                                Chart Type
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" onclick="updateTrendChart('line')">Line Chart</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateTrendChart('area')">Area Chart</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateTrendChart('bar')">Bar Chart</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div id="trendChart" class="w-100" style="height: 350px;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quick Stats Chart -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Quick Stats</h5>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="ri-bar-chart-line me-1"></i>
-                            View
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#" onclick="updateQuickStats('severity')">Severity Distribution</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="updateQuickStats('performance')">Station Performance</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="updateQuickStats('response')">Response Time</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div id="quickStatsChart" class="w-100" style="height: 350px;"></div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Recent Incidents -->
@@ -176,12 +122,6 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Recent Incidents</h5>
                     <div class="d-flex gap-2">
-                        <select class="form-select form-select-sm" id="incidentFilter">
-                            <option value="all">All Incidents</option>
-                            <option value="high">High Severity</option>
-                            <option value="medium">Medium Severity</option>
-                            <option value="low">Low Severity</option>
-                        </select>
                         <a href="{% url 'fire:incident_list' %}" class="btn btn-sm btn-primary">View All</a>
                     </div>
                 </div>
