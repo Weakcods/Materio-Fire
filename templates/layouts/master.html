@@ -53,5 +53,9 @@
   <script src="{% static 'js/config.js' %}"></script>
   <script src="{% static 'js/main.js' %}"></script>
   {% endblock javascripts %}
+
+  {% block page_js %}{% endblock page_js %}
+  
+  {% include 'fire/partials/toast.html' %}
 </body>
 </html>

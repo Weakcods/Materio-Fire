@@ -364,7 +364,15 @@ class IncidentCreateView(LoginRequiredMixin, CreateView):
         date_time = self.request.POST.get('date_time')
         if date_time:
             form.instance.date_time = date_time
-        return super().form_valid(form)
+        
+        # Save the form first
+        response = super().form_valid(form)
+        
+        # Only add the success message if the form was successfully saved
+        if self.object:
+            messages.success(self.request, 'Saved successfully', extra_tags='toast')
+        
+        return response
 
 class IncidentUpdateView(LoginRequiredMixin, UpdateView):
     model = Incident
@@ -393,6 +401,11 @@ class IncidentDeleteView(LoginRequiredMixin, DeleteView):
         context = super().get_context_data(**kwargs)
         context['layout_path'] = 'layouts/master.html'
         return context
+
+    def delete(self, request, *args, **kwargs):
+        response = super().delete(request, *args, **kwargs)
+        messages.success(request, 'Deleted successfully', extra_tags='toast')
+        return response
 
 class FirefighterListView(LoginRequiredMixin, ListView):
     model = Firefighters
