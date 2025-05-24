@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.http import JsonResponse
-from django.db.models import Count
+from django.db.models import Count, Avg
 from django.utils import timezone
 from datetime import timedelta
 from .models import Incident, FireStation, Firefighters, FireTruck, WeatherConditions, Locations
@@ -13,6 +13,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
 from django.contrib import messages
+from django.db.models.functions import TruncMonth
 
 def login_view(request):
     if request.method == 'POST':
@@ -52,9 +53,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['layout_path'] = 'layouts/master.html'
         
         # Overview stats
-        context['active_incidents'] = Incident.objects.filter(
-            date_time__gte=timezone.now() - timedelta(days=1)
-        ).count()
+        context['total_incidents'] = Incident.objects.count()
         context['total_stations'] = FireStation.objects.count()
         context['total_firefighters'] = Firefighters.objects.count()
         context['total_trucks'] = FireTruck.objects.count()
@@ -62,44 +61,81 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         # Recent incidents
         context['recent_incidents'] = Incident.objects.all().order_by('-date_time')[:5]
         
-        # Recent firefighters
-        context['recent_firefighters'] = Firefighters.objects.all().order_by('-id')[:5]
-        
-        # Recent trucks
-        context['recent_trucks'] = FireTruck.objects.all().order_by('-id')[:5]
-        
         # Weather data
         try:
             context['weather'] = WeatherConditions.objects.latest('created_at')
         except WeatherConditions.DoesNotExist:
             context['weather'] = {
                 'temperature': 0,
-                'condition': 'No data',
+                'description': 'No data',
                 'humidity': 0,
-                'wind_speed': 0
+                'wind_speed': 0,
+                'wind_direction': 'N/A',
+                'feels_like': 0
             }
         
-        # Statistics for charts
-        context['incident_stats'] = Incident.objects.values('severity_level').annotate(
+        # Incident Trends Chart Data
+        last_6_months = timezone.now() - timedelta(days=180)
+        monthly_incidents = Incident.objects.filter(
+            date_time__gte=last_6_months
+        ).annotate(
+            month=TruncMonth('date_time')
+        ).values('month').annotate(
+            count=Count('id')
+        ).order_by('month')
+        
+        context['incident_trends'] = {
+            'labels': [incident['month'].strftime('%b %Y') for incident in monthly_incidents],
+            'data': [incident['count'] for incident in monthly_incidents]
+        }
+        
+        # Severity Distribution Chart Data
+        severity_data = Incident.objects.values('severity_level').annotate(
             count=Count('id')
         ).order_by('severity_level')
         
-        # Get station statistics by counting firefighters assigned to each station
-        station_stats = []
+        context['severity_distribution'] = {
+            'labels': [item['severity_level'] for item in severity_data],
+            'data': [item['count'] for item in severity_data]
+        }
+        
+        # Station Performance Chart Data
+        station_performance = []
         for station in FireStation.objects.all():
-            firefighter_count = Firefighters.objects.filter(station=station.name).count()
-            station_stats.append({
+            # Convert Decimal to float for calculations
+            station_lat = float(station.latitude)
+            station_lon = float(station.longitude)
+            
+            # Calculate incidents handled by this station
+            # Using a 10km radius as an example
+            nearby_incidents = Incident.objects.filter(
+                location__latitude__range=(station_lat - 0.1, station_lat + 0.1),
+                location__longitude__range=(station_lon - 0.1, station_lon + 0.1)
+            )
+            
+            # Calculate performance metrics
+            total_incidents = nearby_incidents.count()
+            high_severity_incidents = nearby_incidents.filter(severity_level='HIGH').count()
+            
+            # Calculate performance score (example formula)
+            # Higher score means better performance
+            performance_score = 0
+            if total_incidents > 0:
+                # Base score on total incidents handled
+                base_score = min(total_incidents * 10, 100)
+                # Penalty for high severity incidents
+                severity_penalty = high_severity_incidents * 5
+                performance_score = max(base_score - severity_penalty, 0)
+            
+            station_performance.append({
                 'name': station.name,
-                'firefighters_count': firefighter_count
+                'performance': round(performance_score, 1)
             })
-        context['station_stats'] = station_stats
         
-        context['firefighter_stats'] = Firefighters.objects.values('rank').annotate(
-            count=Count('id')
-        ).order_by('rank')
-        
-        # All stations for map
-        context['stations'] = FireStation.objects.all()
+        context['station_performance'] = {
+            'labels': [item['name'] for item in station_performance],
+            'data': [item['performance'] for item in station_performance]
+        }
         
         return context
 
