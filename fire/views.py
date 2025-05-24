@@ -246,14 +246,24 @@ class DashboardAnalyticsView(LoginRequiredMixin, TemplateView):
                 location__longitude__range=(station_lon - 0.1, station_lon + 0.1)
             )
             
-            # Calculate average response time for nearby incidents
-            avg_response_time = nearby_incidents.aggregate(
-                avg_time=Avg('response_time')
-            )['avg_time'] or 0
+            # Calculate average response time based on time difference
+            total_time = timedelta()
+            incident_count = 0
+            
+            for incident in nearby_incidents:
+                if incident.created_at and incident.date_time:
+                    time_diff = incident.created_at - incident.date_time
+                    if time_diff.total_seconds() > 0:  # Only count positive time differences
+                        total_time += time_diff
+                        incident_count += 1
+            
+            avg_response_time = 0
+            if incident_count > 0:
+                avg_response_time = total_time.total_seconds() / incident_count / 60  # Convert to minutes
             
             response_time_data.append({
                 'name': station.name,
-                'time': round(float(avg_response_time), 1) if avg_response_time else 0
+                'time': round(avg_response_time, 1)
             })
         
         context['response_time_data'] = {
@@ -815,3 +825,21 @@ def incident_trends_api(request):
         'labels': labels,
         'counts': counts
     })
+
+class ChartView(LoginRequiredMixin, TemplateView):
+    template_name = 'fire/chart.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        
+        # Get incident statistics for charts
+        context['total_incidents'] = Incident.objects.count()
+        context['total_stations'] = FireStation.objects.count()
+        context['total_firefighters'] = Firefighters.objects.count()
+        context['total_trucks'] = FireTruck.objects.count()
+        
+        # Get recent incidents
+        context['recent_incidents'] = Incident.objects.all().order_by('-date_time')[:5]
+        
+        return context

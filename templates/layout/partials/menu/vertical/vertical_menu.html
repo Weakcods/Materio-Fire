@@ -142,27 +142,16 @@
       </ul>
     </li>
 
-    <!-- Maps -->
-    <li class="menu-item {% if 'map' in request.resolver_match.url_name %}active{% endif %}">
-      <a href="javascript:void(0);" class="menu-link menu-toggle d-flex align-items-center">
+    <!-- Charts -->
+    <li class="menu-item {% if 'chart' in request.resolver_match.url_name %}active{% endif %}">
+      <a href="{% url 'fire:chart' %}" class="menu-link d-flex align-items-center">
         <div class="d-flex align-items-center">
-          <i class="menu-icon tf-icons ri-map-pin-line"></i>
-          <div class="menu-text text-truncate ms-2" data-i18n="Maps">Maps</div>
+          <i class="menu-icon tf-icons ri-bar-chart-line"></i>
+          <div class="menu-text text-truncate ms-2" data-i18n="Charts">Charts</div>
         </div>
       </a>
-      <ul class="menu-sub">
-        <li class="menu-item {% if 'stations_map' == request.resolver_match.url_name %}active{% endif %}">
-          <a href="{% url 'fire:stations_map' %}" class="menu-link">
-            <div class="text-truncate" data-i18n="Stations Map">Stations Map</div>
-          </a>
-        </li>
-        <li class="menu-item {% if 'incidents_map' == request.resolver_match.url_name %}active{% endif %}">
-          <a href="{% url 'fire:incidents_map' %}" class="menu-link">
-            <div class="text-truncate" data-i18n="Incidents Map">Incidents Map</div>
-          </a>
-        </li>
-      </ul>
     </li>
+    
 
     <!-- Account Settings -->
     <li class="menu-header fw-medium mt-7">
