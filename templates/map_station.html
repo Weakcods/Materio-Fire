@@ -54,7 +54,7 @@
     <h4 class="page-title">Fire Station Locations</h4>
     <ul class="breadcrumbs">
       <li class="nav-home">
-        <a href="#">
+        <a href="{% url 'fire:dashboard' %}">
           <i class="flaticon-home"></i>
         </a>
       </li>
@@ -62,13 +62,13 @@
         <i class="flaticon-right-arrow"></i>
       </li>
       <li class="nav-item">
-        <a href="#">Maps</a>
+        <a href="{% url 'fire:stations_map' %}">Maps</a>
       </li>
       <li class="separator">
         <i class="flaticon-right-arrow"></i>
       </li>
       <li class="nav-item">
-        <a href="#">Fire Stations</a>
+        <a href="{% url 'fire:stations_map' %}">Fire Stations</a>
       </li>
     </ul>
   </div>

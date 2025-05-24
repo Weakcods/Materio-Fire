@@ -419,12 +419,41 @@ class WeatherConditionDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('fire:weather_list')
 
 class StationsMapView(LoginRequiredMixin, TemplateView):
-    template_name = 'fire/map_stations.html'
+    template_name = 'map_station.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['layout_path'] = 'layouts/master.html'
-        context['stations'] = FireStation.objects.all()
+        
+        # Get all fire stations from the database
+        fire_stations = FireStation.objects.all()
+        
+        # Prepare the stations data with their associated trucks
+        stations_data = []
+        for station in fire_stations:
+            # Get all trucks associated with this station
+            trucks = FireTruck.objects.filter(station=station)
+            
+            # Format truck data
+            truck_data = [{
+                'truck_number': truck.truck_number,
+                'model': truck.model,
+                'capacity': truck.capacity
+            } for truck in trucks]
+            
+            # Create station dictionary with all required data
+            station_data = {
+                'name': station.name,
+                'latitude': float(station.latitude) if station.latitude else 0,
+                'longitude': float(station.longitude) if station.longitude else 0,
+                'address': station.address,
+                'phone': '(048) 434-7701',  # You might want to add a phone field to your FireStation model
+                'coverage': f'{station.city} Area',  # Using city as coverage area
+                'trucks': truck_data
+            }
+            stations_data.append(station_data)
+
+        context['stations'] = stations_data
         return context
 
 class IncidentsMapView(LoginRequiredMixin, TemplateView):
