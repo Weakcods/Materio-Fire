@@ -141,7 +141,7 @@
                             <tr>
                                 <td>{{ incident.location.name }}</td>
                                 <td>
-                                    <span class="badge bg-label-{{ incident.severity_level|lower }}">
+                                    <span class="badge {% if incident.severity_level == 'Minor Fire' %}bg-label-success{% elif incident.severity_level == 'Moderate Fire' %}bg-label-warning{% else %}bg-label-danger{% endif %}">
                                         {{ incident.severity_level }}
                                     </span>
                                 </td>
