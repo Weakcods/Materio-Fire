@@ -41,6 +41,7 @@ class FireStation(BaseModel):
     address = models.CharField(max_length=150)
     city = models.CharField(max_length=150)  # can be in separate table
     country = models.CharField(max_length=150)  # can be in separate table
+    contact_number = models.CharField(max_length=20, null=True, blank=True)
 
 
 class Firefighters(BaseModel):
