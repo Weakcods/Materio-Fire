@@ -189,6 +189,13 @@ class IncidentCreateView(LoginRequiredMixin, CreateView):
         context['layout_path'] = 'layouts/master.html'
         return context
 
+    def form_valid(self, form):
+        # Get the date_time from the form data
+        date_time = self.request.POST.get('date_time')
+        if date_time:
+            form.instance.date_time = date_time
+        return super().form_valid(form)
+
 class IncidentUpdateView(LoginRequiredMixin, UpdateView):
     model = Incident
     template_name = 'fire/incident_form.html'
@@ -199,6 +206,13 @@ class IncidentUpdateView(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['layout_path'] = 'layouts/master.html'
         return context
+
+    def form_valid(self, form):
+        # Get the date_time from the form data
+        date_time = self.request.POST.get('date_time')
+        if date_time:
+            form.instance.date_time = date_time
+        return super().form_valid(form)
 
 class IncidentDeleteView(LoginRequiredMixin, DeleteView):
     model = Incident

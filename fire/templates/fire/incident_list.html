@@ -1,4 +1,4 @@
-{% extends layout_path %}
+{% extends 'layouts/master.html' %}
 
 {% load static %}
 {% load i18n %}
@@ -7,167 +7,86 @@
 
 {% block content %}
 <div class="container-xxl flex-grow-1 container-p-y">
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">Fire Management /</span> Incidents
+    </h4>
+
+    <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="card-title mb-0">Fire Incidents</h5>
-          <a href="{% url 'fire:incident_create' %}" class="btn btn-primary">
-            <i class="ri-add-line me-1"></i>New Incident
-          </a>
+            <h5 class="mb-0">Fire Incidents List</h5>
+            <a href="{% url 'fire:incident_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i> Add New Incident
+            </a>
         </div>
         <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover">
-              <thead>
-                <tr>
-                  <th>Location</th>
-                  <th>Severity</th>
-                  <th>Status</th>
-                  <th>Date/Time</th>
-                  <th>Description</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for incident in incidents %}
-                <tr>
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <div class="avatar avatar-sm me-2">
-                        <div class="avatar-initial bg-label-danger rounded">
-                          <i class="ri-fire-line"></i>
-                        </div>
-                      </div>
-                      <span class="fw-medium">{{ incident.location.name }}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <span class="badge bg-label-{% if incident.severity == 'HIGH' %}danger{% elif incident.severity == 'MEDIUM' %}warning{% else %}info{% endif %}">
-                      {{ incident.get_severity_display }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="badge bg-label-{% if incident.status == 'ACTIVE' %}danger{% elif incident.status == 'RESOLVED' %}success{% else %}warning{% endif %}">
-                      {{ incident.get_status_display }}
-                    </span>
-                  </td>
-                  <td>{{ incident.date_time|date:"M d, Y H:i" }}</td>
-                  <td>{{ incident.description|truncatechars:50 }}</td>
-                  <td>
-                    <div class="dropdown">
-                      <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                        <i class="ri-more-2-fill"></i>
-                      </button>
-                      <div class="dropdown-menu">
-                        <a class="dropdown-item" href="{% url 'fire:incident_update' incident.pk %}">
-                          <i class="ri-edit-box-line me-2"></i>Edit
-                        </a>
-                        <a class="dropdown-item" href="{% url 'fire:incident_delete' incident.pk %}">
-                          <i class="ri-delete-bin-line me-2"></i>Delete
-                        </a>
-                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#viewIncidentModal" data-incident-id="{{ incident.pk }}">
-                          <i class="ri-eye-line me-2"></i>View Details
-                        </a>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                {% empty %}
-                <tr>
-                  <td colspan="6" class="text-center py-4">
-                    <p class="mb-0 text-muted">No incidents found</p>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
+            <div class="table-responsive text-nowrap">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Location</th>
+                            <th>Date & Time</th>
+                            <th>Severity</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-border-bottom-0">
+                        {% for incident in incidents %}
+                        <tr>
+                            <td><strong>{{ incident.id }}</strong></td>
+                            <td>{{ incident.location.name }}</td>
+                            <td>{{ incident.date_time|default:"Not set" }}</td>
+                            <td>
+                                {% if incident.severity_level == 'Minor Fire' %}
+                                <span class="badge bg-label-success">Minor</span>
+                                {% elif incident.severity_level == 'Moderate Fire' %}
+                                <span class="badge bg-label-warning">Moderate</span>
+                                {% else %}
+                                <span class="badge bg-label-danger">Major</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ incident.description|truncatechars:50 }}</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'fire:incident_detail' incident.pk %}" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="View Details">
+                                        <i class="bi bi-eye me-1"></i> View
+                                    </a>
+                                    <a href="{% url 'fire:incident_edit' incident.pk %}" class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="Edit Incident">
+                                        <i class="bi bi-pencil me-1"></i> Edit
+                                    </a>
+                                    <a href="{% url 'fire:incident_delete' incident.pk %}" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Delete Incident">
+                                        <i class="bi bi-trash me-1"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No incidents found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-</div>
-
-<!-- View Incident Modal -->
-<div class="modal fade" id="viewIncidentModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Incident Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Incident details will be loaded here -->
-      </div>
-    </div>
-  </div>
 </div>
 {% endblock content %}
+
+{% block vendor_css %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock vendor_css %}
 
 {% block page_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialize View Incident Modal
-  const viewIncidentModal = document.getElementById('viewIncidentModal');
-  if (viewIncidentModal) {
-    viewIncidentModal.addEventListener('show.bs.modal', function(event) {
-      const button = event.relatedTarget;
-      const incidentId = button.getAttribute('data-incident-id');
-      const modalBody = this.querySelector('.modal-body');
-      
-      // Fetch incident details
-      fetch(`/api/incidents/${incidentId}/`)
-        .then(response => response.json())
-        .then(data => {
-          modalBody.innerHTML = `
-            <div class="row">
-              <div class="col-12 mb-4">
-                <h6>Incident Details</h6>
-                <p class="mb-1"><strong>Location:</strong> ${data.location.name}</p>
-                <p class="mb-1"><strong>Severity:</strong> 
-                  <span class="badge bg-label-${data.severity === 'HIGH' ? 'danger' : data.severity === 'MEDIUM' ? 'warning' : 'info'}">
-                    ${data.severity}
-                  </span>
-                </p>
-                <p class="mb-1"><strong>Status:</strong> 
-                  <span class="badge bg-label-${data.status === 'ACTIVE' ? 'danger' : data.status === 'RESOLVED' ? 'success' : 'warning'}">
-                    ${data.status}
-                  </span>
-                </p>
-                <p class="mb-1"><strong>Date/Time:</strong> ${new Date(data.date_time).toLocaleString()}</p>
-                <p class="mb-1"><strong>Description:</strong> ${data.description}</p>
-              </div>
-              <div class="col-12">
-                <h6>Weather Conditions</h6>
-                <div class="table-responsive">
-                  <table class="table table-sm">
-                    <thead>
-                      <tr>
-                        <th>Temperature</th>
-                        <th>Humidity</th>
-                        <th>Wind Speed</th>
-                        <th>Wind Direction</th>
-                        <th>Precipitation</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>${data.weather.temperature}°C</td>
-                        <td>${data.weather.humidity}%</td>
-                        <td>${data.weather.wind_speed} km/h</td>
-                        <td>${data.weather.wind_direction}</td>
-                        <td>${data.weather.precipitation} mm</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          `;
-        });
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
     });
-  }
 });
 </script>
 {% endblock page_js %} 
