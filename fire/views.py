@@ -6,14 +6,14 @@ from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.db.models import Count, Avg
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
 from .models import Incident, FireStation, Firefighters, FireTruck, WeatherConditions, Locations
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
 from django.contrib import messages
-from django.db.models.functions import TruncMonth
+from django.db.models.functions import TruncMonth, TruncDate, TruncWeek
 
 def login_view(request):
     if request.method == 'POST':
@@ -61,19 +61,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         # Recent incidents
         context['recent_incidents'] = Incident.objects.all().order_by('-date_time')[:5]
         
-        # Weather data
-        try:
-            context['weather'] = WeatherConditions.objects.latest('created_at')
-        except WeatherConditions.DoesNotExist:
-            context['weather'] = {
-                'temperature': 0,
-                'description': 'No data',
-                'humidity': 0,
-                'wind_speed': 0,
-                'wind_direction': 'N/A',
-                'feels_like': 0
-            }
-        
         # Incident Trends Chart Data
         last_6_months = timezone.now() - timedelta(days=180)
         monthly_incidents = Incident.objects.filter(
@@ -84,6 +71,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             count=Count('id')
         ).order_by('month')
         
+        # Format incident trends data
         context['incident_trends'] = {
             'labels': [incident['month'].strftime('%b %Y') for incident in monthly_incidents],
             'data': [incident['count'] for incident in monthly_incidents]
@@ -107,7 +95,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             station_lon = float(station.longitude)
             
             # Calculate incidents handled by this station
-            # Using a 10km radius as an example
             nearby_incidents = Incident.objects.filter(
                 location__latitude__range=(station_lat - 0.1, station_lat + 0.1),
                 location__longitude__range=(station_lon - 0.1, station_lon + 0.1)
@@ -117,13 +104,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             total_incidents = nearby_incidents.count()
             high_severity_incidents = nearby_incidents.filter(severity_level='HIGH').count()
             
-            # Calculate performance score (example formula)
-            # Higher score means better performance
+            # Calculate performance score
             performance_score = 0
             if total_incidents > 0:
-                # Base score on total incidents handled
                 base_score = min(total_incidents * 10, 100)
-                # Penalty for high severity incidents
                 severity_penalty = high_severity_incidents * 5
                 performance_score = max(base_score - severity_penalty, 0)
             
@@ -135,6 +119,42 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context['station_performance'] = {
             'labels': [item['name'] for item in station_performance],
             'data': [item['performance'] for item in station_performance]
+        }
+        
+        # Response Time Data (using time difference between created_at and date_time)
+        response_time_data = []
+        for station in FireStation.objects.all():
+            station_lat = float(station.latitude)
+            station_lon = float(station.longitude)
+            
+            nearby_incidents = Incident.objects.filter(
+                location__latitude__range=(station_lat - 0.1, station_lat + 0.1),
+                location__longitude__range=(station_lon - 0.1, station_lon + 0.1)
+            )
+            
+            # Calculate average response time based on time difference
+            total_time = timedelta()
+            incident_count = 0
+            
+            for incident in nearby_incidents:
+                if incident.created_at and incident.date_time:
+                    time_diff = incident.created_at - incident.date_time
+                    if time_diff.total_seconds() > 0:  # Only count positive time differences
+                        total_time += time_diff
+                        incident_count += 1
+            
+            avg_response_time = 0
+            if incident_count > 0:
+                avg_response_time = total_time.total_seconds() / incident_count / 60  # Convert to minutes
+            
+            response_time_data.append({
+                'name': station.name,
+                'time': round(avg_response_time, 1)
+            })
+        
+        context['response_time_data'] = {
+            'labels': [item['name'] for item in response_time_data],
+            'data': [item['time'] for item in response_time_data]
         }
         
         return context
@@ -722,3 +742,76 @@ def weather_data(request):
         'timestamp': weather.created_at,
     }
     return JsonResponse(data)
+
+def incident_trends_api(request):
+    """API endpoint for incident trends data"""
+    time_range = request.GET.get('time_range', 'month')
+    end_date = timezone.now()
+    
+    # Calculate start date based on time range
+    if time_range == 'week':
+        start_date = end_date - timedelta(days=7)
+        trunc_func = TruncDate
+        format_str = '%Y-%m-%d'
+    elif time_range == 'year':
+        start_date = end_date - timedelta(days=365)
+        trunc_func = TruncMonth
+        format_str = '%Y-%m'
+    else:  # month
+        start_date = end_date - timedelta(days=30)
+        trunc_func = TruncDate
+        format_str = '%Y-%m-%d'
+
+    # Query incidents within the date range
+    incidents = Incident.objects.filter(
+        date_time__range=(start_date, end_date)
+    ).annotate(
+        period=trunc_func('date_time')
+    ).values('period').annotate(
+        count=Count('id')
+    ).order_by('period')
+
+    # Format data for chart
+    labels = []
+    counts = []
+    
+    # Create a dictionary of all possible periods
+    period_data = {}
+    current = start_date
+    while current <= end_date:
+        if time_range == 'week':
+            period_key = current.strftime(format_str)
+            period_data[period_key] = 0
+            current += timedelta(days=1)
+        elif time_range == 'year':
+            period_key = current.strftime(format_str)
+            period_data[period_key] = 0
+            # Move to first day of next month
+            if current.month == 12:
+                current = current.replace(year=current.year + 1, month=1, day=1)
+            else:
+                current = current.replace(month=current.month + 1, day=1)
+        else:  # month
+            period_key = current.strftime(format_str)
+            period_data[period_key] = 0
+            current += timedelta(days=1)
+
+    # Update with actual incident counts
+    for incident in incidents:
+        period_key = incident['period'].strftime(format_str)
+        period_data[period_key] = incident['count']
+
+    # Convert to lists for chart
+    for period in sorted(period_data.keys()):
+        if time_range == 'week':
+            labels.append(datetime.strptime(period, format_str).strftime('%a'))
+        elif time_range == 'year':
+            labels.append(datetime.strptime(period, format_str).strftime('%b %Y'))
+        else:  # month
+            labels.append(datetime.strptime(period, format_str).strftime('%d %b'))
+        counts.append(period_data[period])
+
+    return JsonResponse({
+        'labels': labels,
+        'counts': counts
+    })

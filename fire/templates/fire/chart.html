@@ -7,11 +7,48 @@
 {% block vendor_css %}
 {{ block.super }}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}" />
 {% endblock vendor_css %}
 
 {% block content %}
 <div class="container-xxl flex-grow-1 container-p-y">
     <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Fire Management /</span> Charts</h4>
+
+    <!-- Incident Trends Chart -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Incident Trends
+                    </h5>
+                    <div class="d-flex gap-2">
+                        <select class="form-select form-select-sm" id="timeRange">
+                            <option value="week">Last Week</option>
+                            <option value="month" selected>Last Month</option>
+                            <option value="year">Last Year</option>
+                        </select>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-bar-chart-line me-1"></i>
+                                Chart Type
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="updateChartType('line')">Line Chart</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateChartType('area')">Area Chart</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateChartType('bar')">Bar Chart</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <div id="incidentTrendsChart" style="height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="row">
         <div class="col-md-6">
@@ -131,10 +168,131 @@
 {% block vendor_js %}
 {{ block.super }}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
 {% endblock vendor_js %}
 
 {% block page_js %}
 <script>
+    let incidentTrendsChart = null;
+
+    function initIncidentTrendsChart(data) {
+        const options = {
+            series: [{
+                name: 'Incidents',
+                data: data.counts
+            }],
+            chart: {
+                type: 'line',
+                height: 400,
+                toolbar: {
+                    show: false
+                },
+                animations: {
+                    enabled: true,
+                    easing: 'easeinout',
+                    speed: 800
+                }
+            },
+            colors: ['#696cff'],
+            stroke: {
+                curve: 'smooth',
+                width: 3
+            },
+            grid: {
+                borderColor: '#e7e7e7',
+                padding: {
+                    top: -20
+                }
+            },
+            markers: {
+                size: 4,
+                colors: ['#696cff'],
+                strokeColors: '#fff',
+                strokeWidth: 2,
+                hover: {
+                    size: 6
+                }
+            },
+            xaxis: {
+                categories: data.labels,
+                labels: {
+                    style: {
+                        colors: '#697a8d'
+                    }
+                }
+            },
+            yaxis: {
+                labels: {
+                    style: {
+                        colors: '#697a8d'
+                    },
+                    formatter: function(value) {
+                        return Math.round(value);
+                    }
+                }
+            },
+            tooltip: {
+                theme: 'dark',
+                y: {
+                    formatter: function(value) {
+                        return value + ' incidents';
+                    }
+                }
+            },
+            legend: {
+                show: false
+            }
+        };
+
+        if (incidentTrendsChart) {
+            incidentTrendsChart.destroy();
+        }
+
+        incidentTrendsChart = new ApexCharts(document.querySelector("#incidentTrendsChart"), options);
+        incidentTrendsChart.render();
+    }
+
+    function updateChartType(type) {
+        if (incidentTrendsChart) {
+            incidentTrendsChart.updateOptions({
+                chart: {
+                    type: type
+                }
+            });
+        }
+    }
+
+    function loadIncidentTrends(timeRange = 'month') {
+        fetch(`/api/incident-trends/?time_range=${timeRange}`)
+            .then(response => response.json())
+            .then(data => {
+                initIncidentTrendsChart(data);
+            })
+            .catch(error => {
+                console.error('Error loading incident trends:', error);
+                // Show error message to user
+                const chartContainer = document.querySelector("#incidentTrendsChart");
+                if (chartContainer) {
+                    chartContainer.innerHTML = `
+                        <div class="alert alert-danger m-3">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Failed to load incident trends. Please try again later.
+                        </div>
+                    `;
+                }
+            });
+    }
+
+    // Event Listeners
+    document.getElementById('timeRange').addEventListener('change', function() {
+        loadIncidentTrends(this.value);
+    });
+
+    // Initialize chart on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadIncidentTrends();
+    });
+
     function loadChartData() {
         // Pie Chart (Severity)
         fetch("{% url 'fire:incident_statistics' %}")

@@ -14,31 +14,26 @@
 
 {% block content %}
 <div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Header -->
+    <!-- Header with Search -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card">
-                <div class="card-body d-flex justify-content-between align-items-center">
-                    <div>
-                        <h4 class="mb-1">Fire Management Dashboard</h4>
-                        <p class="text-muted mb-0">Welcome to your fire management control center</p>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <a href="{% url 'fire:dashboard_analytics' %}" class="btn btn-primary">
-                            <i class="ri-line-chart-line me-1"></i>
-                            Analytics
-                        </a>
-                        <div class="dropdown">
-                            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="ri-bar-chart-line me-1"></i>
-                                Charts
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" onclick="showChart('incident-trends')">Incident Trends</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="showChart('severity-distribution')">Severity Distribution</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="showChart('station-performance')">Station Performance</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="showChart('response-time')">Response Time</a></li>
-                            </ul>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h4 class="mb-1">Fire Management Dashboard</h4>
+                            <p class="text-muted mb-0">Welcome to your fire management control center</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="ri-search-line"></i></span>
+                                <input type="text" class="form-control" placeholder="Search incidents..." id="searchInput">
+                                <button class="btn btn-primary" type="button" id="searchButton">Search</button>
+                            </div>
+                            <a href="{% url 'fire:dashboard_analytics' %}" class="btn btn-primary">
+                                <i class="ri-line-chart-line me-1"></i>
+                                Analytics
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -118,63 +113,57 @@
         </div>
     </div>
 
-    <!-- Quick Access Cards -->
+    <!-- Charts Section -->
     <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card h-100">
+        <!-- Incident Trends Chart -->
+        <div class="col-md-8">
+            <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Analytics Overview</h5>
-                    <a href="{% url 'fire:dashboard_analytics' %}" class="btn btn-sm btn-primary">View All</a>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex flex-column gap-3">
-                        <div class="d-flex align-items-center">
-                            <div class="avatar avatar-sm me-3">
-                                <span class="avatar-initial rounded bg-label-primary">
-                                    <i class="ri-line-chart-line"></i>
-                                </span>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0">Incident Trends</h6>
-                                <small class="text-muted">View incident patterns over time</small>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <div class="avatar avatar-sm me-3">
-                                <span class="avatar-initial rounded bg-label-success">
-                                    <i class="ri-pie-chart-line"></i>
-                                </span>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0">Severity Distribution</h6>
-                                <small class="text-muted">Analyze incident severity levels</small>
-                            </div>
+                    <h5 class="card-title mb-0">Incident Trends</h5>
+                    <div class="d-flex gap-2">
+                        <select class="form-select form-select-sm" id="trendTimeRange">
+                            <option value="week">Last Week</option>
+                            <option value="month" selected>Last Month</option>
+                            <option value="year">Last Year</option>
+                        </select>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="ri-bar-chart-line me-1"></i>
+                                Chart Type
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" onclick="updateTrendChart('line')">Line Chart</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateTrendChart('area')">Area Chart</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="updateTrendChart('bar')">Bar Chart</a></li>
+                            </ul>
                         </div>
                     </div>
                 </div>
+                <div class="card-body">
+                    <div id="trendChart" class="w-100" style="height: 350px;"></div>
+                </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="card h-100">
+
+        <!-- Quick Stats Chart -->
+        <div class="col-md-4">
+            <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Quick Charts</h5>
+                    <h5 class="card-title mb-0">Quick Stats</h5>
                     <div class="dropdown">
                         <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
                             <i class="ri-bar-chart-line me-1"></i>
-                            Select Chart
+                            View
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#" onclick="showChart('incident-trends')">Incident Trends</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="showChart('severity-distribution')">Severity Distribution</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="showChart('station-performance')">Station Performance</a></li>
-                            <li><a class="dropdown-item" href="#" onclick="showChart('response-time')">Response Time</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="updateQuickStats('severity')">Severity Distribution</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="updateQuickStats('performance')">Station Performance</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="updateQuickStats('response')">Response Time</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div id="selected-chart" class="w-100" style="height: 300px;">
-                        <!-- Chart will be rendered here -->
-                    </div>
+                    <div id="quickStatsChart" class="w-100" style="height: 350px;"></div>
                 </div>
             </div>
         </div>
@@ -186,7 +175,15 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="card-title mb-0">Recent Incidents</h5>
-                    <a href="{% url 'fire:incident_list' %}" class="btn btn-sm btn-primary">View All</a>
+                    <div class="d-flex gap-2">
+                        <select class="form-select form-select-sm" id="incidentFilter">
+                            <option value="all">All Incidents</option>
+                            <option value="high">High Severity</option>
+                            <option value="medium">Medium Severity</option>
+                            <option value="low">Low Severity</option>
+                        </select>
+                        <a href="{% url 'fire:incident_list' %}" class="btn btn-sm btn-primary">View All</a>
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover">
@@ -199,7 +196,7 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="incidentsTableBody">
                             {% for incident in recent_incidents %}
                             <tr>
                                 <td>{{ incident.location.name }}</td>
@@ -237,130 +234,233 @@
 {{ block.super }}
 <script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock vendor_js %}
 
 {% block page_js %}
 <script>
-    // Initialize maps with better styling
-    const stationsMap = L.map('stationsMap', {
-        zoomControl: false,
-        scrollWheelZoom: true
-    }).setView([0, 0], 2);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(stationsMap);
-
-    // Custom map controls
-    L.control.zoom({
-        position: 'bottomright'
-    }).addTo(stationsMap);
-
-    // Add station markers with custom icons
-    const fireStationIcon = L.divIcon({
-        html: '<i class="bi bi-building-fill text-danger fs-4"></i>',
-        className: 'custom-div-icon',
-        iconSize: [30, 30],
-        iconAnchor: [15, 15]
-    });
-
-    {% for station in stations %}
-    L.marker([{{ station.latitude }}, {{ station.longitude }}], {icon: fireStationIcon})
-        .bindPopup(`
-            <div class="text-center p-2">
-                <i class="bi bi-building-fill text-danger fs-4 mb-2"></i>
-                <h6 class="mb-1"><b>{{ station.name }}</b></h6>
-                <p class="mb-1 small">{{ station.address }}</p>
-                <div class="d-flex justify-content-center gap-2 mt-2">
-                    <a href="{% url 'fire:station_detail' station.pk %}" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-eye me-1"></i>View
-                    </a>
-                    <a href="{% url 'fire:station_edit' station.pk %}" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-pencil me-1"></i>Edit
-                    </a>
-                </div>
-            </div>
-        `)
-        .addTo(stationsMap);
-    {% endfor %}
-
     // Chart data from context
     const incidentTrends = {{ incident_trends|safe }};
     const severityDistribution = {{ severity_distribution|safe }};
     const stationPerformance = {{ station_performance|safe }};
     const responseTimeData = {{ response_time_data|safe }};
 
-    // Initialize default chart
-    let currentChart = null;
+    // Initialize charts
+    let trendChart = null;
+    let quickStatsChart = null;
 
-    function showChart(chartType) {
-        const chartElement = document.getElementById('selected-chart');
-        if (currentChart) {
-            currentChart.destroy();
-        }
-
-        let options = {
+    // Initialize trend chart
+    function initTrendChart(data) {
+        const options = {
+            series: [{
+                name: 'Incidents',
+                data: data.data || data.counts
+            }],
             chart: {
                 type: 'line',
-                height: 300,
+                height: 350,
                 toolbar: {
                     show: false
+                },
+                animations: {
+                    enabled: true,
+                    easing: 'easeinout',
+                    speed: 800
                 }
             },
-            series: [{
-                name: 'Count',
-                data: []
-            }],
-            xaxis: {
-                categories: []
-            },
             colors: ['#696cff'],
+            stroke: {
+                curve: 'smooth',
+                width: 3
+            },
             grid: {
                 borderColor: '#e7e7e7',
                 padding: {
                     top: -20
                 }
             },
-            tooltip: {
-                y: {
-                    formatter: function (val) {
-                        return val
+            markers: {
+                size: 4,
+                colors: ['#696cff'],
+                strokeColors: '#fff',
+                strokeWidth: 2,
+                hover: {
+                    size: 6
+                }
+            },
+            xaxis: {
+                categories: data.labels,
+                labels: {
+                    style: {
+                        colors: '#697a8d'
                     }
                 }
+            },
+            yaxis: {
+                labels: {
+                    style: {
+                        colors: '#697a8d'
+                    },
+                    formatter: function(value) {
+                        return Math.round(value);
+                    }
+                }
+            },
+            tooltip: {
+                theme: 'dark',
+                y: {
+                    formatter: function(value) {
+                        return value + ' incidents';
+                    }
+                }
+            },
+            legend: {
+                show: false
             }
         };
 
-        switch (chartType) {
-            case 'incident-trends':
-                options.series[0].data = incidentTrends.data;
-                options.xaxis.categories = incidentTrends.labels;
-                options.chart.type = 'line';
-                break;
-            case 'severity-distribution':
-                options.series[0].data = severityDistribution.data;
-                options.xaxis.categories = severityDistribution.labels;
-                options.chart.type = 'donut';
-                break;
-            case 'station-performance':
-                options.series[0].data = stationPerformance.data;
-                options.xaxis.categories = stationPerformance.labels;
-                options.chart.type = 'bar';
-                break;
-            case 'response-time':
-                options.series[0].data = responseTimeData.data;
-                options.xaxis.categories = responseTimeData.labels;
-                options.chart.type = 'line';
-                break;
+        if (trendChart) {
+            trendChart.destroy();
         }
 
-        currentChart = new ApexCharts(chartElement, options);
-        currentChart.render();
+        trendChart = new ApexCharts(document.querySelector("#trendChart"), options);
+        trendChart.render();
     }
 
-    // Show incident trends by default
+    // Load incident trends data
+    function loadIncidentTrends(timeRange = 'month') {
+        fetch(`/fire/api/incident-trends/?time_range=${timeRange}`)
+            .then(response => response.json())
+            .then(data => {
+                initTrendChart(data);
+            })
+            .catch(error => {
+                console.error('Error loading incident trends:', error);
+                const chartContainer = document.querySelector("#trendChart");
+                if (chartContainer) {
+                    chartContainer.innerHTML = `
+                        <div class="alert alert-danger m-3">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Failed to load incident trends. Please try again later.
+                        </div>
+                    `;
+                }
+            });
+    }
+
+    // Update trend chart type
+    function updateTrendChart(type) {
+        if (trendChart) {
+            trendChart.updateOptions({
+                chart: {
+                    type: type
+                }
+            });
+        }
+    }
+
+    // Initialize quick stats chart
+    function initQuickStatsChart() {
+        const options = {
+            chart: {
+                type: 'donut',
+                height: 350,
+                toolbar: { show: false }
+            },
+            series: severityDistribution.data,
+            labels: severityDistribution.labels,
+            colors: ['#71dd37', '#ffab00', '#ff3e1d'],
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '70%',
+                        labels: {
+                            show: true,
+                            name: { show: true },
+                            value: { show: true },
+                            total: { show: true, label: 'Total' }
+                        }
+                    }
+                }
+            },
+            legend: {
+                position: 'bottom',
+                labels: { colors: '#697a8d' }
+            }
+        };
+
+        quickStatsChart = new ApexCharts(document.querySelector("#quickStatsChart"), options);
+        quickStatsChart.render();
+    }
+
+    // Update quick stats chart
+    function updateQuickStats(type) {
+        if (quickStatsChart) {
+            let data, labels, chartType;
+            
+            switch(type) {
+                case 'severity':
+                    data = severityDistribution.data;
+                    labels = severityDistribution.labels;
+                    chartType = 'donut';
+                    break;
+                case 'performance':
+                    data = stationPerformance.data;
+                    labels = stationPerformance.labels;
+                    chartType = 'bar';
+                    break;
+                case 'response':
+                    data = responseTimeData.data;
+                    labels = responseTimeData.labels;
+                    chartType = 'line';
+                    break;
+            }
+
+            quickStatsChart.updateOptions({
+                chart: { type: chartType },
+                series: [{
+                    name: type.charAt(0).toUpperCase() + type.slice(1),
+                    data: data
+                }],
+                labels: labels
+            });
+        }
+    }
+
+    // Search functionality
+    document.getElementById('searchButton').addEventListener('click', function() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#incidentsTableBody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    // Filter incidents
+    document.getElementById('incidentFilter').addEventListener('change', function() {
+        const filter = this.value;
+        const rows = document.querySelectorAll('#incidentsTableBody tr');
+        
+        rows.forEach(row => {
+            const severity = row.querySelector('.badge').textContent.toLowerCase();
+            row.style.display = filter === 'all' || severity === filter ? '' : 'none';
+        });
+    });
+
+    // Event Listeners
+    document.getElementById('trendTimeRange')?.addEventListener('change', function() {
+        loadIncidentTrends(this.value);
+    });
+
+    // Initialize charts on page load
     document.addEventListener('DOMContentLoaded', function() {
-        showChart('incident-trends');
+        // Initialize with the data from context first
+        initTrendChart(incidentTrends);
+        initQuickStatsChart();
+        
+        // Then load fresh data from API
+        loadIncidentTrends();
     });
 </script>
 {% endblock page_js %} 
