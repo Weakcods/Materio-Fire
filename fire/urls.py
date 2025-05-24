@@ -6,6 +6,7 @@ app_name = 'fire'
 urlpatterns = [
     # Dashboard
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
+    path('dashboard/analytics/', views.DashboardAnalyticsView.as_view(), name='dashboard_analytics'),
     
     # Incidents
     path('incidents/', views.IncidentListView.as_view(), name='incident_list'),

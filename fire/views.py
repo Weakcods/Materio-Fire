@@ -139,6 +139,110 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         
         return context
 
+class DashboardAnalyticsView(LoginRequiredMixin, TemplateView):
+    template_name = 'fire/dashboard_analytics.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['layout_path'] = 'layouts/master.html'
+        
+        # Overview stats
+        context['total_incidents'] = Incident.objects.count()
+        context['total_stations'] = FireStation.objects.count()
+        context['total_firefighters'] = Firefighters.objects.count()
+        context['total_trucks'] = FireTruck.objects.count()
+        
+        # Recent incidents
+        context['recent_incidents'] = Incident.objects.all().order_by('-date_time')[:5]
+        
+        # Incident Trends Chart Data
+        last_6_months = timezone.now() - timedelta(days=180)
+        monthly_incidents = Incident.objects.filter(
+            date_time__gte=last_6_months
+        ).annotate(
+            month=TruncMonth('date_time')
+        ).values('month').annotate(
+            count=Count('id')
+        ).order_by('month')
+        
+        context['incident_trends'] = {
+            'labels': [incident['month'].strftime('%b %Y') for incident in monthly_incidents],
+            'data': [incident['count'] for incident in monthly_incidents]
+        }
+        
+        # Severity Distribution Chart Data
+        severity_data = Incident.objects.values('severity_level').annotate(
+            count=Count('id')
+        ).order_by('severity_level')
+        
+        context['severity_distribution'] = {
+            'labels': [item['severity_level'] for item in severity_data],
+            'data': [item['count'] for item in severity_data]
+        }
+        
+        # Station Performance Chart Data
+        station_performance = []
+        for station in FireStation.objects.all():
+            # Convert Decimal to float for calculations
+            station_lat = float(station.latitude)
+            station_lon = float(station.longitude)
+            
+            # Calculate incidents handled by this station
+            nearby_incidents = Incident.objects.filter(
+                location__latitude__range=(station_lat - 0.1, station_lat + 0.1),
+                location__longitude__range=(station_lon - 0.1, station_lon + 0.1)
+            )
+            
+            # Calculate performance metrics
+            total_incidents = nearby_incidents.count()
+            high_severity_incidents = nearby_incidents.filter(severity_level='HIGH').count()
+            
+            # Calculate performance score
+            performance_score = 0
+            if total_incidents > 0:
+                base_score = min(total_incidents * 10, 100)
+                severity_penalty = high_severity_incidents * 5
+                performance_score = max(base_score - severity_penalty, 0)
+            
+            station_performance.append({
+                'name': station.name,
+                'performance': round(performance_score, 1)
+            })
+        
+        context['station_performance'] = {
+            'labels': [item['name'] for item in station_performance],
+            'data': [item['performance'] for item in station_performance]
+        }
+        
+        # Response Time Data
+        response_time_data = []
+        for station in FireStation.objects.all():
+            # Get incidents near this station
+            station_lat = float(station.latitude)
+            station_lon = float(station.longitude)
+            
+            nearby_incidents = Incident.objects.filter(
+                location__latitude__range=(station_lat - 0.1, station_lat + 0.1),
+                location__longitude__range=(station_lon - 0.1, station_lon + 0.1)
+            )
+            
+            # Calculate average response time for nearby incidents
+            avg_response_time = nearby_incidents.aggregate(
+                avg_time=Avg('response_time')
+            )['avg_time'] or 0
+            
+            response_time_data.append({
+                'name': station.name,
+                'time': round(float(avg_response_time), 1) if avg_response_time else 0
+            })
+        
+        context['response_time_data'] = {
+            'labels': [item['name'] for item in response_time_data],
+            'data': [item['time'] for item in response_time_data]
+        }
+        
+        return context
+
 class StationListView(LoginRequiredMixin, ListView):
     model = FireStation
     template_name = 'fire/station_list.html'
@@ -419,7 +523,7 @@ class WeatherConditionDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('fire:weather_list')
 
 class StationsMapView(LoginRequiredMixin, TemplateView):
-    template_name = 'map_station.html'
+    template_name = 'fire/map_stations.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -447,8 +551,8 @@ class StationsMapView(LoginRequiredMixin, TemplateView):
                 'latitude': float(station.latitude) if station.latitude else 0,
                 'longitude': float(station.longitude) if station.longitude else 0,
                 'address': station.address,
-                'phone': '(048) 434-7701',  # You might want to add a phone field to your FireStation model
-                'coverage': f'{station.city} Area',  # Using city as coverage area
+                'phone': '(048) 434-7701',  
+                'coverage': f'{station.city} Area',  
                 'trucks': truck_data
             }
             stations_data.append(station_data)

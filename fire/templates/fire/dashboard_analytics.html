@@ -1,0 +1,744 @@
+{% extends 'layouts/master.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Fire Management Analytics{% endblock title %}
+
+{% block vendor_css %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+{% endblock vendor_css %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+  <!-- Header -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="d-flex justify-content-between align-items-center row py-3 px-4">
+          <div class="col-md-6">
+            <h4 class="card-title mb-0">Fire Management Analytics</h4>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                  <a href="{% url 'fire:dashboard' %}">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item active">Analytics</li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Left Side Menu -->
+    <div class="col-lg-3 col-md-4 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Navigation</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush">
+            <!-- Dashboard -->
+            <a href="{% url 'fire:dashboard' %}" class="list-group-item list-group-item-action d-flex align-items-center">
+              <i class="bi bi-house-door me-3 fs-4"></i>
+              <span>Dashboard</span>
+            </a>
+
+            <!-- Incidents -->
+            <div class="list-group-item">
+              <div class="d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#incidentsSubmenu">
+                <i class="bi bi-fire me-3 fs-4"></i>
+                <span>Incidents</span>
+                <i class="bi bi-chevron-down ms-auto"></i>
+              </div>
+              <div class="collapse mt-2" id="incidentsSubmenu">
+                <div class="list-group list-group-flush">
+                  <a href="{% url 'fire:incident_list' %}" class="list-group-item list-group-item-action ps-5">
+                    <i class="bi bi-list-ul me-2"></i>
+                    All Incidents
+                  </a>
+                  <a href="{% url 'fire:incident_create' %}" class="list-group-item list-group-item-action ps-5">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    New Incident
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fire Stations -->
+            <div class="list-group-item">
+              <div class="d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#stationsSubmenu">
+                <i class="bi bi-building me-3 fs-4"></i>
+                <span>Fire Stations</span>
+                <i class="bi bi-chevron-down ms-auto"></i>
+              </div>
+              <div class="collapse mt-2" id="stationsSubmenu">
+                <div class="list-group list-group-flush">
+                  <a href="{% url 'fire:station_list' %}" class="list-group-item list-group-item-action ps-5">
+                    <i class="bi bi-list-ul me-2"></i>
+                    All Stations
+                  </a>
+                  <a href="{% url 'fire:station_create' %}" class="list-group-item list-group-item-action ps-5">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    New Station
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Firefighters -->
+            <div class="list-group-item">
+              <div class="d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#firefightersSubmenu">
+                <i class="bi bi-people me-3 fs-4"></i>
+                <span>Firefighters</span>
+                <i class="bi bi-chevron-down ms-auto"></i>
+              </div>
+              <div class="collapse mt-2" id="firefightersSubmenu">
+                <div class="list-group list-group-flush">
+                  <a href="{% url 'fire:firefighter_list' %}" class="list-group-item list-group-item-action ps-5">
+                    <i class="bi bi-list-ul me-2"></i>
+                    All Firefighters
+                  </a>
+                  <a href="{% url 'fire:firefighter_create' %}" class="list-group-item list-group-item-action ps-5">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    New Firefighter
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Fire Trucks -->
+            <div class="list-group-item">
+              <div class="d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#trucksSubmenu">
+                <i class="bi bi-truck me-3 fs-4"></i>
+                <span>Fire Trucks</span>
+                <i class="bi bi-chevron-down ms-auto"></i>
+              </div>
+              <div class="collapse mt-2" id="trucksSubmenu">
+                <div class="list-group list-group-flush">
+                  <a href="{% url 'fire:truck_list' %}" class="list-group-item list-group-item-action ps-5">
+                    <i class="bi bi-list-ul me-2"></i>
+                    All Trucks
+                  </a>
+                  <a href="{% url 'fire:truck_create' %}" class="list-group-item list-group-item-action ps-5">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    New Truck
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Maps -->
+            <div class="list-group-item">
+              <div class="d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#mapsSubmenu">
+                <i class="bi bi-map me-3 fs-4"></i>
+                <span>Maps</span>
+                <i class="bi bi-chevron-down ms-auto"></i>
+              </div>
+              <div class="collapse mt-2" id="mapsSubmenu">
+                <div class="list-group list-group-flush">
+                  <a href="{% url 'fire:stations_map' %}" class="list-group-item list-group-item-action ps-5">
+                    <i class="bi bi-geo-alt me-2"></i>
+                    Stations Map
+                  </a>
+                  <a href="{% url 'fire:incidents_map' %}" class="list-group-item list-group-item-action ps-5">
+                    <i class="bi bi-geo-alt me-2"></i>
+                    Incidents Map
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="list-group-item">
+              <div class="d-flex align-items-center" data-bs-toggle="collapse" data-bs-target="#chartsSubmenu">
+                <i class="bi bi-bar-chart me-3 fs-4"></i>
+                <span>Charts</span>
+                <i class="bi bi-chevron-down ms-auto"></i>
+              </div>
+              <div class="collapse mt-2" id="chartsSubmenu">
+                <div class="list-group list-group-flush">
+                  <a href="#" class="list-group-item list-group-item-action ps-5" data-chart="incident-trends">
+                    <i class="bi bi-graph-up me-2"></i>
+                    Incident Trends
+                  </a>
+                  <a href="#" class="list-group-item list-group-item-action ps-5" data-chart="severity-distribution">
+                    <i class="bi bi-pie-chart me-2"></i>
+                    Severity Distribution
+                  </a>
+                  <a href="#" class="list-group-item list-group-item-action ps-5" data-chart="station-performance">
+                    <i class="bi bi-bar-chart-line me-2"></i>
+                    Station Performance
+                  </a>
+                  <a href="#" class="list-group-item list-group-item-action ps-5" data-chart="response-time">
+                    <i class="bi bi-clock-history me-2"></i>
+                    Response Time
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Analytics -->
+            <a href="{% url 'fire:dashboard_analytics' %}" class="list-group-item list-group-item-action active d-flex align-items-center">
+              <i class="bi bi-graph-up me-3 fs-4"></i>
+              <span>Analytics</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-lg-9 col-md-8">
+      <!-- Overview Stats -->
+      <div class="row gy-4 mb-4">
+        <!-- Total Incidents -->
+        <div class="col-md-3">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="avatar">
+                  <div class="avatar-initial bg-label-danger rounded shadow">
+                    <i class="bi bi-fire fs-4"></i>
+                  </div>
+                </div>
+                <div class="ms-3">
+                  <div class="small fw-medium">Total Incidents</div>
+                  <h5 class="mb-0">{{ total_incidents }}</h5>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Stations -->
+        <div class="col-md-3">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="avatar">
+                  <div class="avatar-initial bg-label-success rounded shadow">
+                    <i class="bi bi-building fs-4"></i>
+                  </div>
+                </div>
+                <div class="ms-3">
+                  <div class="small fw-medium">Active Stations</div>
+                  <h5 class="mb-0">{{ total_stations }}</h5>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Firefighters -->
+        <div class="col-md-3">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="avatar">
+                  <div class="avatar-initial bg-label-warning rounded shadow">
+                    <i class="bi bi-people fs-4"></i>
+                  </div>
+                </div>
+                <div class="ms-3">
+                  <div class="small fw-medium">Firefighters</div>
+                  <h5 class="mb-0">{{ total_firefighters }}</h5>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fire Trucks -->
+        <div class="col-md-3">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <div class="avatar">
+                  <div class="avatar-initial bg-label-info rounded shadow">
+                    <i class="bi bi-truck fs-4"></i>
+                  </div>
+                </div>
+                <div class="ms-3">
+                  <div class="small fw-medium">Fire Trucks</div>
+                  <h5 class="mb-0">{{ total_trucks }}</h5>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Controls -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0">Data Visualization</h5>
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#chartControls">
+                  <i class="bi bi-graph-up me-2"></i>Show Charts
+                </button>
+                <div class="dropdown">
+                  <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="timeRangeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    Time Range
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="timeRangeDropdown">
+                    <li><a class="dropdown-item" href="#" data-range="week">Last Week</a></li>
+                    <li><a class="dropdown-item" href="#" data-range="month">Last Month</a></li>
+                    <li><a class="dropdown-item" href="#" data-range="year">Last Year</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="collapse" id="chartControls">
+        <div class="row gy-4">
+          <!-- Incident Trends -->
+          <div class="col-lg-8">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Incident Trends</h5>
+                <div class="dropdown">
+                  <button class="btn text-muted p-0" type="button" id="incidentTrendsDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-end" aria-labelledby="incidentTrendsDropdown">
+                    <a class="dropdown-item" href="#" data-chart-type="line">Line Chart</a>
+                    <a class="dropdown-item" href="#" data-chart-type="bar">Bar Chart</a>
+                    <a class="dropdown-item" href="#" data-chart-type="area">Area Chart</a>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="incidentTrendsChart" style="height: 300px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Severity Distribution -->
+          <div class="col-lg-4">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="card-title mb-0">Severity Distribution</h5>
+              </div>
+              <div class="card-body">
+                <div id="severityDistributionChart" style="height: 300px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Station Performance -->
+          <div class="col-lg-6">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="card-title mb-0">Station Performance</h5>
+              </div>
+              <div class="card-body">
+                <div id="stationPerformanceChart" style="height: 300px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Response Time Analysis -->
+          <div class="col-lg-6">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="card-title mb-0">Response Time Analysis</h5>
+              </div>
+              <div class="card-body">
+                <div id="responseTimeChart" style="height: 300px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Incidents Table -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0">Recent Incidents</h5>
+              <a href="{% url 'fire:incident_list' %}" class="btn btn-primary btn-sm">
+                View All
+              </a>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Location</th>
+                      <th>Type</th>
+                      <th>Severity</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for incident in recent_incidents|slice:":5" %}
+                    <tr>
+                      <td>#{{ incident.id }}</td>
+                      <td>{{ incident.location }}</td>
+                      <td>{{ incident.incident_type }}</td>
+                      <td>
+                        <span class="badge bg-label-{{ incident.severity|lower }}">
+                          {{ incident.severity }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge bg-label-{{ incident.status|lower }}">
+                          {{ incident.status }}
+                        </span>
+                      </td>
+                      <td>{{ incident.date_reported|date:"M d, Y" }}</td>
+                      <td>
+                        <a href="{% url 'fire:incident_detail' incident.id %}" class="btn btn-sm btn-icon btn-outline-primary">
+                          <i class="bi bi-eye"></i>
+                        </a>
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="7" class="text-center py-4">
+                        <div class="d-flex flex-column align-items-center">
+                          <i class="bi bi-inbox display-4 text-muted mb-3"></i>
+                          <p class="text-muted mb-0">No recent incidents to display</p>
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block vendor_js %}
+{{ block.super }}
+<script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize all dropdowns
+  var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="collapse"]'))
+  var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+    return new bootstrap.Collapse(dropdownToggleEl, {
+      toggle: false
+    })
+  });
+
+  // Chart type and time range variables
+  let currentChartType = 'area';
+  let currentTimeRange = 'month';
+
+  // Function to show specific chart
+  function showChart(chartId) {
+    // Hide all charts first
+    document.querySelectorAll('.chart-container').forEach(container => {
+      container.style.display = 'none';
+    });
+    
+    // Show selected chart
+    const selectedChart = document.getElementById(chartId);
+    if (selectedChart) {
+      selectedChart.style.display = 'block';
+    }
+  }
+
+  // Chart menu item click handlers
+  document.querySelectorAll('[data-chart]').forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      const chartId = this.dataset.chart;
+      showChart(chartId + 'Chart');
+      
+      // Update active state
+      document.querySelectorAll('[data-chart]').forEach(link => {
+        link.classList.remove('active');
+      });
+      this.classList.add('active');
+    });
+  });
+
+  // Function to update charts based on time range
+  function updateCharts(timeRange) {
+    // Make AJAX call to get updated data
+    fetch(`/fire/api/analytics/?time_range=${timeRange}`)
+      .then(response => response.json())
+      .then(data => {
+        updateIncidentTrendsChart(data.incident_trends);
+        updateSeverityDistributionChart(data.severity_distribution);
+        updateStationPerformanceChart(data.station_performance);
+        updateResponseTimeChart(data.response_time);
+      })
+      .catch(error => console.error('Error fetching chart data:', error));
+  }
+
+  // Time range dropdown event listeners
+  document.querySelectorAll('[data-range]').forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      currentTimeRange = this.dataset.range;
+      updateCharts(currentTimeRange);
+    });
+  });
+
+  // Chart type dropdown event listeners
+  document.querySelectorAll('[data-chart-type]').forEach(item => {
+    item.addEventListener('click', function(e) {
+      e.preventDefault();
+      currentChartType = this.dataset.chartType;
+      updateIncidentTrendsChart({{ incident_trends|safe }}, currentChartType);
+    });
+  });
+
+  // Incident Trends Chart
+  function updateIncidentTrendsChart(data, chartType = 'area') {
+    const options = {
+      series: [{
+        name: 'Incidents',
+        data: data.data
+      }],
+      chart: {
+        height: 300,
+        type: chartType,
+        toolbar: {
+          show: false
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        curve: 'smooth',
+        width: 2
+      },
+      colors: ['#696cff'],
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shadeIntensity: 1,
+          opacityFrom: 0.7,
+          opacityTo: 0.2,
+          stops: [0, 90, 100]
+        }
+      },
+      xaxis: {
+        categories: data.labels,
+        axisBorder: {
+          show: false
+        },
+        axisTicks: {
+          show: false
+        }
+      },
+      yaxis: {
+        labels: {
+          formatter: function(val) {
+            return Math.round(val);
+          }
+        }
+      },
+      tooltip: {
+        x: {
+          format: 'MMM'
+        }
+      }
+    };
+
+    if (window.incidentTrendsChart) {
+      window.incidentTrendsChart.updateOptions(options);
+    } else {
+      window.incidentTrendsChart = new ApexCharts(
+        document.querySelector("#incidentTrendsChart"),
+        options
+      );
+      window.incidentTrendsChart.render();
+    }
+  }
+
+  // Severity Distribution Chart
+  function updateSeverityDistributionChart(data) {
+    const options = {
+      series: data.data,
+      chart: {
+        height: 300,
+        type: 'donut'
+      },
+      labels: data.labels,
+      colors: ['#71dd37', '#ffab00', '#ff3e1d'],
+      plotOptions: {
+        pie: {
+          donut: {
+            size: '70%',
+            labels: {
+              show: true,
+              name: {
+                show: true,
+                fontSize: '14px',
+                fontWeight: 600
+              },
+              value: {
+                show: true,
+                fontSize: '16px',
+                fontWeight: 600
+              },
+              total: {
+                show: true,
+                label: 'Total',
+                fontSize: '16px',
+                fontWeight: 600
+              }
+            }
+          }
+        }
+      },
+      legend: {
+        position: 'bottom'
+      }
+    };
+
+    if (window.severityDistributionChart) {
+      window.severityDistributionChart.updateOptions(options);
+    } else {
+      window.severityDistributionChart = new ApexCharts(
+        document.querySelector("#severityDistributionChart"),
+        options
+      );
+      window.severityDistributionChart.render();
+    }
+  }
+
+  // Station Performance Chart
+  function updateStationPerformanceChart(data) {
+    const options = {
+      series: [{
+        name: 'Response Time',
+        data: data.data
+      }],
+      chart: {
+        height: 300,
+        type: 'bar',
+        toolbar: {
+          show: false
+        }
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 8,
+          columnWidth: '40%'
+        }
+      },
+      colors: ['#696cff'],
+      dataLabels: {
+        enabled: false
+      },
+      xaxis: {
+        categories: data.labels,
+        axisBorder: {
+          show: false
+        },
+        axisTicks: {
+          show: false
+        }
+      },
+      yaxis: {
+        title: {
+          text: 'Minutes'
+        }
+      }
+    };
+
+    if (window.stationPerformanceChart) {
+      window.stationPerformanceChart.updateOptions(options);
+    } else {
+      window.stationPerformanceChart = new ApexCharts(
+        document.querySelector("#stationPerformanceChart"),
+        options
+      );
+      window.stationPerformanceChart.render();
+    }
+  }
+
+  // Response Time Analysis Chart
+  function updateResponseTimeChart(data) {
+    const options = {
+      series: [{
+        name: 'Average Response Time',
+        data: data.data
+      }],
+      chart: {
+        height: 300,
+        type: 'line',
+        toolbar: {
+          show: false
+        }
+      },
+      stroke: {
+        curve: 'smooth',
+        width: 2
+      },
+      colors: ['#ff3e1d'],
+      markers: {
+        size: 4,
+        colors: ['#ff3e1d'],
+        strokeColors: '#fff',
+        strokeWidth: 2
+      },
+      xaxis: {
+        categories: data.labels,
+        axisBorder: {
+          show: false
+        },
+        axisTicks: {
+          show: false
+        }
+      },
+      yaxis: {
+        title: {
+          text: 'Minutes'
+        }
+      }
+    };
+
+    if (window.responseTimeChart) {
+      window.responseTimeChart.updateOptions(options);
+    } else {
+      window.responseTimeChart = new ApexCharts(
+        document.querySelector("#responseTimeChart"),
+        options
+      );
+      window.responseTimeChart.render();
+    }
+  }
+
+  // Initialize charts with initial data
+  updateIncidentTrendsChart({{ incident_trends|safe }});
+  updateSeverityDistributionChart({{ severity_distribution|safe }});
+  updateStationPerformanceChart({{ station_performance|safe }});
+  updateResponseTimeChart({{ response_time_data|safe }});
+});
+</script>
+{% endblock page_js %} 
