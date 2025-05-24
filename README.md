@@ -12,48 +12,12 @@ A comprehensive web-based fire management system built with Django and Materio U
 - Interactive maps for stations and incidents
 - Recent incidents and activities tracking
 
-### Incident Management
-- Track and manage fire incidents
-- Severity level classification
-- Location-based incident mapping
-- Detailed incident reporting
-- Historical incident data
-
-### Fire Station Management
-- Manage multiple fire stations
-- Station capacity tracking
-- Location mapping
-- Contact information management
-- Resource allocation
-
-### Firefighter Management
-- Personnel tracking
-- Rank management
-- Station assignment
-- Contact information
-- Performance monitoring
-
-### Fire Truck Management
-- Vehicle tracking
-- Maintenance status
-- Capacity monitoring
-- Station assignment
-- Status updates
-
-### Weather Monitoring
-- Real-time weather conditions
-- Temperature tracking
-- Humidity monitoring
-- Wind speed and direction
-- Precipitation data
-
 ## Technical Stack
 
 - **Backend**: Django 5.0
 - **Frontend**: 
   - Materio UI Template
   - Bootstrap 5
-  - ApexCharts for data visualization
   - Leaflet for interactive maps
 - **Database**: SQLite (default) / PostgreSQL (recommended for production)
 
@@ -107,46 +71,6 @@ fire-management/
 └── manage.py               # Django management script
 ```
 
-## Models
-
-### Incident
-- Location
-- Severity Level
-- Description
-- Date/Time
-- Status
-
-### FireStation
-- Name
-- Address
-- Contact Number
-- Latitude/Longitude
-- Capacity
-
-### Firefighter
-- Name
-- Rank
-- Station
-- Contact Information
-- Email
-
-### FireTruck
-- Truck Number
-- Station
-- Status
-- Capacity
-- Last Maintenance
-
-### WeatherCondition
-- Location
-- Temperature
-- Humidity
-- Wind Speed
-- Wind Direction
-- Precipitation
-- Timestamp
-
-## Usage
 
 1. Access the dashboard at `http://localhost:8000/fire/dashboard/`
 2. Log in with your superuser credentials
@@ -184,24 +108,3 @@ fire-management/
 - `PUT /api/trucks/<id>/` - Update truck
 - `DELETE /api/trucks/<id>/` - Delete truck
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For support, email support@firemanagement.com or create an issue in the repository.
-
-## Acknowledgments
-
-- Materio UI Template for the beautiful interface
-- Django community for the excellent framework
-- All contributors who have helped shape this project
