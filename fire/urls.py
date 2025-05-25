@@ -43,6 +43,10 @@ urlpatterns = [
     
     # Authentication
     path('logout/', views.logout_view, name='logout'),
+    
+    # API Endpoints
     path('api/incident-trends/', views.incident_trends_api, name='incident_trends_api'),
     path('api/incident-statistics/', views.incident_statistics, name='incident_statistics'),
+    path('api/firefighters/', views.firefighter_list, name='firefighter_list_api'),
+    path('api/trucks/', views.truck_list, name='truck_list_api'),
 ] 

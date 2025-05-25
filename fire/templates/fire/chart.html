@@ -2,7 +2,7 @@
 {% load static %} 
 {% load i18n %}
 
-{% block title %}Weather Conditions Chart{% endblock title %}
+{% block title %}Data Analytics{% endblock title %}
 
 {% block vendor_css %}
 {{ block.super }}
@@ -13,23 +13,48 @@
 {% block content %}
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="row">
-        <div class="col-12">
+        <!-- Incidents Chart -->
+        <div class="col-12 mb-4">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">Weather Conditions</h5>
+                    <h5 class="card-title mb-0">Incidents by Fire Station</h5>
                     <div class="dropdown">
-                        <button class="btn btn-primary dropdown-toggle" type="button" id="weatherMetricDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            Temperature
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="timeRangeDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            Last 30 Days
                         </button>
-                        <ul class="dropdown-menu" aria-labelledby="weatherMetricDropdown">
-                            <li><a class="dropdown-item" href="#" data-metric="temperature">Temperature</a></li>
-                            <li><a class="dropdown-item" href="#" data-metric="humidity">Humidity</a></li>
-                            <li><a class="dropdown-item" href="#" data-metric="wind_speed">Wind Speed</a></li>
+                        <ul class="dropdown-menu" aria-labelledby="timeRangeDropdown">
+                            <li><a class="dropdown-item" href="#" data-range="week">Last 7 Days</a></li>
+                            <li><a class="dropdown-item" href="#" data-range="month">Last 30 Days</a></li>
+                            <li><a class="dropdown-item" href="#" data-range="year">Last Year</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div id="weatherChart" style="min-height: 400px;"></div>
+                    <canvas id="incidentsChart" height="400"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Firefighters Distribution -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Firefighters by Rank</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="firefightersChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fire Trucks Status -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Fire Trucks Status</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="trucksChart" height="300"></canvas>
                 </div>
             </div>
         </div>
@@ -43,161 +68,160 @@
 {% endblock vendor_js %}
 
 {% block page_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Weather data from context
-    const weatherData = {{ weather_data|safe }};
-    
-    // Chart options
-    const options = {
-        series: [{
-            name: 'Temperature',
-            data: weatherData.temperature
-        }],
-        chart: {
-            type: 'line',
-            height: 400,
-            toolbar: {
-                show: false
-            },
-            zoom: {
-                enabled: true
-            },
-            animations: {
-                enabled: true,
-                easing: 'easeinout',
-                speed: 800
-            }
-        },
-        colors: ['#696cff'],
-        stroke: {
-            curve: 'smooth',
-            width: 3,
-            lineCap: 'round'
-        },
-        grid: {
-            borderColor: '#e7e7e7',
-            padding: {
-                top: 10,
-                right: 10,
-                bottom: 10,
-                left: 10
-            }
-        },
-        markers: {
-            size: 4,
-            colors: ['#696cff'],
-            strokeColors: '#fff',
-            strokeWidth: 2,
-            hover: {
-                size: 6
-            }
-        },
-        xaxis: {
-            categories: weatherData.dates,
-            labels: {
-                style: {
-                    colors: '#697a8d',
-                    fontSize: '12px'
-                },
-                rotate: -45,
-                rotateAlways: true,
-                maxHeight: 60
-            },
-            axisBorder: {
-                show: true,
-                color: '#e7e7e7'
-            },
-            axisTicks: {
-                show: true,
-                color: '#e7e7e7'
-            }
-        },
-        yaxis: {
-            labels: {
-                style: {
-                    colors: '#697a8d',
-                    fontSize: '12px'
-                }
-            },
-            axisBorder: {
-                show: true,
-                color: '#e7e7e7'
-            },
-            axisTicks: {
-                show: true,
-                color: '#e7e7e7'
-            }
-        },
-        tooltip: {
-            theme: 'light',
-            x: {
-                format: 'dd MMM yyyy HH:mm'
-            },
-            y: {
-                formatter: function(value) {
-                    return value + '°C';
-                }
-            }
-        },
-        legend: {
-            show: true,
-            position: 'top',
-            horizontalAlign: 'right',
-            fontSize: '14px',
-            markers: {
-                width: 12,
-                height: 12,
-                radius: 12
-            }
+    let incidentsChart = null;
+
+    // Function to create/update incidents chart
+    function createIncidentsChart(data) {
+        const ctx = document.getElementById('incidentsChart').getContext('2d');
+        
+        if (incidentsChart) {
+            incidentsChart.destroy();
         }
-    };
 
-    // Initialize chart
-    const chart = new ApexCharts(document.querySelector("#weatherChart"), options);
-    chart.render();
+        incidentsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: data.datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
 
-    // Handle metric selection
-    document.querySelectorAll('.dropdown-item').forEach(item => {
+    // Initial fetch of incidents data
+    fetch('{% url "fire:incident_trends_api" %}')
+        .then(response => response.json())
+        .then(data => {
+            createIncidentsChart(data);
+        })
+        .catch(error => {
+            console.error('Error fetching incident trends:', error);
+        });
+
+    // Handle time range selection
+    document.querySelectorAll('.dropdown-item[data-range]').forEach(item => {
         item.addEventListener('click', function(e) {
             e.preventDefault();
-            const metric = this.dataset.metric;
-            const metricName = this.textContent;
-            const metricData = weatherData[metric];
-            let unit = '';
+            const range = this.dataset.range;
+            document.getElementById('timeRangeDropdown').textContent = this.textContent;
             
-            // Set appropriate unit based on metric
-            switch(metric) {
-                case 'temperature':
-                    unit = '°C';
-                    break;
-                case 'humidity':
-                    unit = '%';
-                    break;
-                case 'wind_speed':
-                    unit = ' km/h';
-                    break;
-            }
+            // Fetch new data for the selected range
+            fetch(`{% url "fire:incident_trends_api" %}?time_range=${range}`)
+                .then(response => response.json())
+                .then(data => {
+                    createIncidentsChart(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching incident trends:', error);
+                });
+        });
+    });
 
-            // Update chart
-            chart.updateOptions({
-                series: [{
-                    name: metricName,
-                    data: metricData
-                }],
-                tooltip: {
-                    y: {
-                        formatter: function(value) {
-                            return value + unit;
+    // Fetch firefighters data
+    fetch('{% url "fire:firefighter_list_api" %}')
+        .then(response => response.json())
+        .then(data => {
+            // Group firefighters by rank
+            const rankCounts = {};
+            data.forEach(firefighter => {
+                rankCounts[firefighter.rank] = (rankCounts[firefighter.rank] || 0) + 1;
+            });
+
+            // Firefighters Chart
+            const firefightersCtx = document.getElementById('firefightersChart').getContext('2d');
+            new Chart(firefightersCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(rankCounts),
+                    datasets: [{
+                        data: Object.values(rankCounts),
+                        backgroundColor: [
+                            '#696cff',
+                            '#8592a3',
+                            '#71dd37',
+                            '#ff3e1d',
+                            '#03c3ec',
+                            '#ffab00'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
                         }
                     }
                 }
             });
-
-            // Update dropdown button text
-            document.getElementById('weatherMetricDropdown').textContent = metricName;
+        })
+        .catch(error => {
+            console.error('Error fetching firefighters data:', error);
         });
-    });
+
+    // Fetch trucks data
+    fetch('{% url "fire:truck_list_api" %}')
+        .then(response => response.json())
+        .then(data => {
+            // Group trucks by status
+            const statusCounts = {};
+            data.forEach(truck => {
+                statusCounts[truck.status] = (statusCounts[truck.status] || 0) + 1;
+            });
+
+            // Trucks Chart
+            const trucksCtx = document.getElementById('trucksChart').getContext('2d');
+            new Chart(trucksCtx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(statusCounts),
+                    datasets: [{
+                        data: Object.values(statusCounts),
+                        backgroundColor: [
+                            '#71dd37',  // Active
+                            '#ffab00',  // Maintenance
+                            '#ff3e1d'   // Out of Service
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching trucks data:', error);
+        });
 });
 </script>
 {% endblock page_js %}

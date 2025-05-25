@@ -805,30 +805,37 @@ def incident_trends_api(request):
         trunc_func = TruncDate
         format_str = '%Y-%m-%d'
 
+    # Get all fire stations
+    stations = FireStation.objects.all()
+    station_data = {}
+
+    # Initialize data structure for each station
+    for station in stations:
+        station_data[station.name] = {
+            'incidents': [],
+            'response_times': []
+        }
+
     # Query incidents within the date range
     incidents = Incident.objects.filter(
         date_time__range=(start_date, end_date)
-    ).annotate(
+    ).select_related('location').annotate(
         period=trunc_func('date_time')
-    ).values('period').annotate(
+    ).values('period', 'location__name').annotate(
         count=Count('id')
-    ).order_by('period')
+    ).order_by('period', 'location__name')
 
-    # Format data for chart
-    labels = []
-    counts = []
-    
     # Create a dictionary of all possible periods
     period_data = {}
     current = start_date
     while current <= end_date:
         if time_range == 'week':
             period_key = current.strftime(format_str)
-            period_data[period_key] = 0
+            period_data[period_key] = {station.name: 0 for station in stations}
             current += timedelta(days=1)
         elif time_range == 'year':
             period_key = current.strftime(format_str)
-            period_data[period_key] = 0
+            period_data[period_key] = {station.name: 0 for station in stations}
             # Move to first day of next month
             if current.month == 12:
                 current = current.replace(year=current.year + 1, month=1, day=1)
@@ -836,13 +843,19 @@ def incident_trends_api(request):
                 current = current.replace(month=current.month + 1, day=1)
         else:  # month
             period_key = current.strftime(format_str)
-            period_data[period_key] = 0
+            period_data[period_key] = {station.name: 0 for station in stations}
             current += timedelta(days=1)
 
     # Update with actual incident counts
     for incident in incidents:
         period_key = incident['period'].strftime(format_str)
-        period_data[period_key] = incident['count']
+        station_name = incident['location__name']
+        if period_key in period_data and station_name in period_data[period_key]:
+            period_data[period_key][station_name] = incident['count']
+
+    # Format data for chart
+    labels = []
+    datasets = []
 
     # Convert to lists for chart
     for period in sorted(period_data.keys()):
@@ -852,11 +865,23 @@ def incident_trends_api(request):
             labels.append(datetime.strptime(period, format_str).strftime('%b %Y'))
         else:  # month
             labels.append(datetime.strptime(period, format_str).strftime('%d %b'))
-        counts.append(period_data[period])
+
+    # Create dataset for each station
+    colors = ['#696cff', '#8592a3', '#71dd37', '#ff3e1d', '#03c3ec', '#ffab00']
+    for i, station in enumerate(stations):
+        station_counts = [period_data[period][station.name] for period in sorted(period_data.keys())]
+        datasets.append({
+            'label': station.name,
+            'data': station_counts,
+            'borderColor': colors[i % len(colors)],
+            'backgroundColor': colors[i % len(colors)] + '20',  # Add transparency
+            'tension': 0.4,
+            'fill': False
+        })
 
     return JsonResponse({
         'labels': labels,
-        'counts': counts
+        'datasets': datasets
     })
 
 class ChartView(LoginRequiredMixin, TemplateView):
@@ -893,34 +918,11 @@ class ChartView(LoginRequiredMixin, TemplateView):
             count=Count('id')
         ).order_by('date')
         
-        # Get weather conditions data (last 30 days)
-        weather_data = WeatherConditions.objects.filter(
-            created_at__gte=timezone.now() - timedelta(days=30)
-        ).order_by('created_at')
-        
-        # Format weather data for chart
-        weather_chart_data = {
-            'dates': [],
-            'temperature': [],
-            'humidity': [],
-            'wind_speed': [],
-            'weather_description': []
-        }
-        
-        for weather in weather_data:
-            weather_chart_data['dates'].append(weather.created_at.strftime('%Y-%m-%d %H:%M'))
-            weather_chart_data['temperature'].append(float(weather.temperature))
-            weather_chart_data['humidity'].append(float(weather.humidity))
-            weather_chart_data['wind_speed'].append(float(weather.wind_speed))
-            weather_chart_data['weather_description'].append(weather.weather_description)
-        
         context['incident_statistics'] = {
             'total_incidents': context['total_incidents'],
             'recent_incidents': recent_incidents,
             'by_severity': list(incidents_by_severity),
             'by_date': list(incidents_by_date)
         }
-        
-        context['weather_data'] = weather_chart_data
         
         return context
