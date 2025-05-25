@@ -438,6 +438,11 @@ class FirefighterCreateView(LoginRequiredMixin, CreateView):
         context['layout_path'] = 'layouts/master.html'
         return context
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f'Firefighter {form.instance.name} was successfully created.', extra_tags='toast')
+        return response
+
 class FirefighterUpdateView(LoginRequiredMixin, UpdateView):
     model = Firefighters
     template_name = 'fire/firefighter_form.html'
@@ -448,6 +453,11 @@ class FirefighterUpdateView(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['layout_path'] = 'layouts/master.html'
         return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f'Firefighter {form.instance.name} was successfully updated.', extra_tags='toast')
+        return response
 
 class FirefighterDeleteView(LoginRequiredMixin, DeleteView):
     model = Firefighters

@@ -1,0 +1,113 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Add{% endif %} Firefighter{% endblock title %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">{% if form.instance.pk %}Edit{% else %}Add{% endif %} Firefighter</h5>
+          <a href="{% url 'fire:firefighter_list' %}" class="btn btn-outline-secondary">
+            <i class="ri-arrow-left-line me-1"></i>Back to List
+          </a>
+        </div>
+        <div class="card-body">
+          <form method="post" class="row g-3">
+            {% csrf_token %}
+            
+            <!-- Name -->
+            <div class="col-12">
+              <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
+              {{ form.name }}
+              {% if form.name.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.name.errors }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Rank -->
+            <div class="col-12">
+              <label for="{{ form.rank.id_for_label }}" class="form-label">Rank</label>
+              {{ form.rank }}
+              {% if form.rank.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.rank.errors }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Experience Level -->
+            <div class="col-12">
+              <label for="{{ form.experience_level.id_for_label }}" class="form-label">Experience Level</label>
+              {{ form.experience_level }}
+              {% if form.experience_level.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.experience_level.errors }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Station -->
+            <div class="col-12">
+              <label for="{{ form.station.id_for_label }}" class="form-label">Station</label>
+              {{ form.station }}
+              {% if form.station.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.station.errors }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Contact Number -->
+            <div class="col-12">
+              <label for="{{ form.contact_number.id_for_label }}" class="form-label">Contact Number</label>
+              {{ form.contact_number }}
+              {% if form.contact_number.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.contact_number.errors }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Email -->
+            <div class="col-12">
+              <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+              {{ form.email }}
+              {% if form.email.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.email.errors }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Submit Button -->
+            <div class="col-12 text-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="ri-save-line me-1"></i>Save
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block page_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Add Bootstrap classes to form fields
+  const formFields = document.querySelectorAll('input, select');
+  formFields.forEach(field => {
+    field.classList.add('form-control');
+  });
+});
+</script>
+{% endblock page_js %} 
