@@ -1,0 +1,190 @@
+// Cross-browser compatibility fixes
+
+// Fix for autofill styling across browsers
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: inherit;
+  -webkit-box-shadow: 0 0 0 1000px transparent inset;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+// Firefox-specific fixes
+@-moz-document url-prefix() {
+  // Form control fixes
+  .form-floating > .form-control:focus ~ label {
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  }
+  
+  .input-group-merge .form-control {
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+
+  // Select element fixes
+  select.form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    -moz-appearance: none;
+  }
+
+  // Number input fixes
+  input[type="number"] {
+    -moz-appearance: textfield;
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  }
+}
+
+// Safari fixes
+@supports (-webkit-touch-callout: none) {
+  // Fix for iOS input zoom
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="search"],
+  input[type="password"],
+  textarea.form-control {
+    font-size: 16px; // Prevents zoom on iOS
+  }
+
+  // Fix for border-radius rendering
+  .form-control,
+  .form-select,
+  .input-group-text {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+}
+
+// Edge/IE specific fixes
+@supports (-ms-ime-align: auto) {
+  // Fix padding and alignment
+  .form-control {
+    padding-top: 0.5rem;
+    line-height: normal;
+  }
+
+  // Fix for flex layout
+  .input-group {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: stretch;
+    align-items: stretch;
+  }
+}
+
+// Consistent form validation styles
+.was-validated .form-control:valid,
+.was-validated .form-control:invalid {
+  background-position: right calc(0.375em + 0.1875rem) center;
+  background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+// Fix transitions across browsers
+.form-control,
+.form-select,
+.input-group-text {
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  will-change: border-color, box-shadow;
+}
+
+// Fix box-shadow rendering
+.form-control:focus,
+.form-select:focus {
+-webkit-box-shadow: var(--bs-focus-ring-box-shadow, none);
+box-shadow: var(--bs-focus-ring-box-shadow, none);
+  padding-bottom: 0.5rem;
+}
+
+.input-group-merge .input-group-text {
+  display: flex;
+  align-items: center;
+}
+
+// Safari specific fixes
+@supports (overflow:-webkit-marquee) and (justify-content:inherit) {
+  .form-floating > .form-control:focus ~ label,
+  .form-floating > .form-control:not(:placeholder-shown) ~ label {
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  }
+}
+
+// Fix form transitions across browsers
+.form-control,
+.form-select,
+.input-group-text {
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+// Fix validation states across browsers
+.was-validated .form-control:valid,
+.was-validated .form-control:invalid {
+  background-position: right calc(0.375em + 0.1875rem) center;
+  background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+// Fix for flex layouts in older browsers
+.input-group {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+}
+
+// Fix form animations
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+  opacity: 0.65;
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  -webkit-transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  -moz-transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  -ms-transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+// Fix button states
+.btn {
+  &:active,
+  &.active {
+    -webkit-box-shadow: none;
+    box-shadow: none;
+  }
+  
+  &:disabled,
+  &.disabled {
+    opacity: 0.65;
+    pointer-events: none;
+  }
+}
+
+// Fix modal animations
+.modal.fade .modal-dialog {
+  -webkit-transform: translate(0, -50px);
+  transform: translate(0, -50px);
+  -webkit-transition: -webkit-transform 0.3s ease-out;
+  transition: -webkit-transform 0.3s ease-out;
+  transition: transform 0.3s ease-out;
+  transition: transform 0.3s ease-out, -webkit-transform 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+  -webkit-transform: none;
+  transform: none;
+}

@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET_KEY", default='django-insecure-' + ''.join(random.choice(string.ascii_lowercase) for i in range(32)))
+SECRET_KEY = 'django-insecure-f78e96%nau32wn^d3b93frv^&k#pxt94zl_5&&^bfsywdc65vk'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -148,10 +148,29 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_DIRS = [
     BASE_DIR / "src" / "assets",
+    BASE_DIR / "static",
 ]
 
-# Add whitenoise configuration
+# Add whitenoise configuration with caching
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# WhiteNoise configuration
+WHITENOISE_MAX_AGE = 31536000  # 1 year in seconds
+WHITENOISE_MANIFEST_STRICT = False  # Helps with first deployment
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_COMPRESS = True
+WHITENOISE_MIMETYPES = {
+    'text/css': 'css',
+    'application/javascript': 'js',
+    'image/png': 'png',
+    'image/jpeg': 'jpg',
+    'image/gif': 'gif',
+    'image/svg+xml': 'svg',
+    'font/woff': 'woff',
+    'font/woff2': 'woff2',
+    'application/vnd.ms-fontobject': 'eot',
+    'font/ttf': 'ttf',
+}
 
 # Media files
 MEDIA_URL = '/media/'
