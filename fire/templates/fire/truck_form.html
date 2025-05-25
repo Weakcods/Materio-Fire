@@ -1,0 +1,102 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Add{% endif %} Fire Truck{% endblock title %}
+
+{% block content %}
+<div class="container-xxl flex-grow-1 container-p-y">
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">{% if form.instance.pk %}Edit{% else %}Add{% endif %} Fire Truck</h5>
+          <a href="{% url 'fire:truck_list' %}" class="btn btn-outline-secondary">
+            <i class="ri-arrow-left-line me-1"></i>Back to List
+          </a>
+        </div>
+        <div class="card-body">
+          <form method="post" class="row g-3">
+            {% csrf_token %}
+            
+            <!-- Truck Number -->
+            <div class="col-12">
+              <label for="{{ form.truck_number.id_for_label }}" class="form-label">Truck Number</label>
+              {{ form.truck_number }}
+              {% if form.truck_number.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.truck_number.errors }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Model -->
+            <div class="col-12">
+              <label for="{{ form.model.id_for_label }}" class="form-label">Model</label>
+              {{ form.model }}
+              {% if form.model.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.model.errors }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Capacity -->
+            <div class="col-12">
+              <label for="{{ form.capacity.id_for_label }}" class="form-label">Water Capacity</label>
+              {{ form.capacity }}
+              {% if form.capacity.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.capacity.errors }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Station -->
+            <div class="col-12">
+              <label for="{{ form.station.id_for_label }}" class="form-label">Station</label>
+              {{ form.station }}
+              {% if form.station.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.station.errors }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Status -->
+            <div class="col-12">
+              <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+              {{ form.status }}
+              {% if form.status.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.status.errors }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Submit Button -->
+            <div class="col-12 text-end">
+              <button type="submit" class="btn btn-primary">
+                <i class="ri-save-line me-1"></i>Save
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block page_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Add Bootstrap classes to form fields
+  const formFields = document.querySelectorAll('input, select');
+  formFields.forEach(field => {
+    field.classList.add('form-control');
+  });
+});
+</script>
+{% endblock page_js %} 

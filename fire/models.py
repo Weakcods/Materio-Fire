@@ -63,10 +63,16 @@ class Firefighters(BaseModel):
 
 
 class FireTruck(BaseModel):
+    STATUS_CHOICES = (
+        ('ACTIVE', 'Active'),
+        ('MAINTENANCE', 'In Maintenance'),
+        ('OUT_OF_SERVICE', 'Out of Service'),
+    )
     truck_number = models.CharField(max_length=150)
     model = models.CharField(max_length=150)
     capacity = models.CharField(max_length=150)  # water
     station = models.ForeignKey(FireStation, on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ACTIVE')
 
 
 class WeatherConditions(BaseModel):

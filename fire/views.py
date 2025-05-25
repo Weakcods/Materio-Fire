@@ -500,6 +500,11 @@ class FireTruckCreateView(LoginRequiredMixin, CreateView):
         context['layout_path'] = 'layouts/master.html'
         return context
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f'Fire Truck {form.instance.truck_number} was successfully created.', extra_tags='toast')
+        return response
+
 class FireTruckUpdateView(LoginRequiredMixin, UpdateView):
     model = FireTruck
     template_name = 'fire/truck_form.html'
@@ -510,6 +515,11 @@ class FireTruckUpdateView(LoginRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         context['layout_path'] = 'layouts/master.html'
         return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, f'Fire Truck {form.instance.truck_number} was successfully updated.', extra_tags='toast')
+        return response
 
 class FireTruckDeleteView(LoginRequiredMixin, DeleteView):
     model = FireTruck
