@@ -855,4 +855,52 @@ class ChartView(LoginRequiredMixin, TemplateView):
         # Get recent incidents
         context['recent_incidents'] = Incident.objects.all().order_by('-date_time')[:5]
         
+        # Get incident statistics
+        recent_incidents = Incident.objects.filter(
+            date_time__gte=timezone.now() - timedelta(days=30)
+        ).count()
+        
+        incidents_by_severity = Incident.objects.values('severity_level').annotate(
+            count=Count('id')
+        ).order_by('severity_level')
+        
+        # Get incidents by date (last 30 days)
+        incidents_by_date = Incident.objects.filter(
+            date_time__gte=timezone.now() - timedelta(days=30)
+        ).annotate(
+            date=TruncDate('date_time')
+        ).values('date').annotate(
+            count=Count('id')
+        ).order_by('date')
+        
+        # Get weather conditions data (last 30 days)
+        weather_data = WeatherConditions.objects.filter(
+            created_at__gte=timezone.now() - timedelta(days=30)
+        ).order_by('created_at')
+        
+        # Format weather data for chart
+        weather_chart_data = {
+            'dates': [],
+            'temperature': [],
+            'humidity': [],
+            'wind_speed': [],
+            'weather_description': []
+        }
+        
+        for weather in weather_data:
+            weather_chart_data['dates'].append(weather.created_at.strftime('%Y-%m-%d %H:%M'))
+            weather_chart_data['temperature'].append(float(weather.temperature))
+            weather_chart_data['humidity'].append(float(weather.humidity))
+            weather_chart_data['wind_speed'].append(float(weather.wind_speed))
+            weather_chart_data['weather_description'].append(weather.weather_description)
+        
+        context['incident_statistics'] = {
+            'total_incidents': context['total_incidents'],
+            'recent_incidents': recent_incidents,
+            'by_severity': list(incidents_by_severity),
+            'by_date': list(incidents_by_date)
+        }
+        
+        context['weather_data'] = weather_chart_data
+        
         return context

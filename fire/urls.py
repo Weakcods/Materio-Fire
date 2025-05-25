@@ -44,4 +44,5 @@ urlpatterns = [
     # Authentication
     path('logout/', views.logout_view, name='logout'),
     path('api/incident-trends/', views.incident_trends_api, name='incident_trends_api'),
+    path('api/incident-statistics/', views.incident_statistics, name='incident_statistics'),
 ] 

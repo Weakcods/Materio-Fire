@@ -2,7 +2,7 @@
 {% load static %} 
 {% load i18n %}
 
-{% block title %}Fire Management Charts{% endblock title %}
+{% block title %}Weather Conditions Chart{% endblock title %}
 
 {% block vendor_css %}
 {{ block.super }}
@@ -12,152 +12,24 @@
 
 {% block content %}
 <div class="container-xxl flex-grow-1 container-p-y">
-    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Fire Management /</span> Charts</h4>
-
-    <!-- Incident Trends Chart -->
     <div class="row">
         <div class="col-12">
-            <div class="card mb-4">
+            <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-graph-up me-2"></i>Incident Trends
-                    </h5>
-                    <div class="d-flex gap-2">
-                        <select class="form-select form-select-sm" id="timeRange">
-                            <option value="week">Last Week</option>
-                            <option value="month" selected>Last Month</option>
-                            <option value="year">Last Year</option>
-                        </select>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-bar-chart-line me-1"></i>
-                                Chart Type
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" onclick="updateChartType('line')">Line Chart</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateChartType('area')">Area Chart</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateChartType('bar')">Bar Chart</a></li>
-                            </ul>
-                        </div>
+                    <h5 class="card-title mb-0">Weather Conditions</h5>
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="weatherMetricDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            Temperature
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="weatherMetricDropdown">
+                            <li><a class="dropdown-item" href="#" data-metric="temperature">Temperature</a></li>
+                            <li><a class="dropdown-item" href="#" data-metric="humidity">Humidity</a></li>
+                            <li><a class="dropdown-item" href="#" data-metric="wind_speed">Wind Speed</a></li>
+                        </ul>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="chart-container">
-                        <div id="incidentTrendsChart" style="height: 400px;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0"><i class="bi bi-graph-up me-2"></i>Line Chart</h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="lineChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0"><i class="bi bi-bar-chart me-2"></i>Bar Chart</h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="barChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0"><i class="bi bi-pie-chart me-2"></i>Pie Chart (Severity)</h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="pieChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0"><i class="bi bi-pie-chart-fill me-2"></i>Doughnut Chart</h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="doughnutChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0"><i class="bi bi-broadcast me-2"></i>Radar Chart</h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="radarChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0"><i class="bi bi-bullseye me-2"></i>Bubble Chart</h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="bubbleChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Multiple Line Chart</h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="multipleLineChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0"><i class="bi bi-bar-chart-steps me-2"></i>Multiple Bar Chart (Severity by Month)</h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="multipleBarChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-12">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0"><i class="bi bi-list me-2"></i>Chart with HTML Legends</h5>
-                </div>
-                <div class="card-body">
-                     <div class="card-sub">Sometimes you need a very complex legend. In these cases, it makes sense to generate an HTML legend. Charts provide a generateLegend() method on their prototype that returns an HTML string for the legend.</div>
-                    <div class="chart-container">
-                        <canvas id="htmlLegendsChart"></canvas>
-                    </div>
-                    <div id="myChartLegend" class="mt-3 text-center"></div>
+                    <div id="weatherChart" style="min-height: 400px;"></div>
                 </div>
             </div>
         </div>
@@ -167,693 +39,166 @@
 
 {% block vendor_js %}
 {{ block.super }}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
 {% endblock vendor_js %}
 
 {% block page_js %}
 <script>
-    let incidentTrendsChart = null;
-
-    function initIncidentTrendsChart(data) {
-        const options = {
-            series: [{
-                name: 'Incidents',
-                data: data.counts
-            }],
-            chart: {
-                type: 'line',
-                height: 400,
-                toolbar: {
-                    show: false
-                },
-                animations: {
-                    enabled: true,
-                    easing: 'easeinout',
-                    speed: 800
-                }
-            },
-            colors: ['#696cff'],
-            stroke: {
-                curve: 'smooth',
-                width: 3
-            },
-            grid: {
-                borderColor: '#e7e7e7',
-                padding: {
-                    top: -20
-                }
-            },
-            markers: {
-                size: 4,
-                colors: ['#696cff'],
-                strokeColors: '#fff',
-                strokeWidth: 2,
-                hover: {
-                    size: 6
-                }
-            },
-            xaxis: {
-                categories: data.labels,
-                labels: {
-                    style: {
-                        colors: '#697a8d'
-                    }
-                }
-            },
-            yaxis: {
-                labels: {
-                    style: {
-                        colors: '#697a8d'
-                    },
-                    formatter: function(value) {
-                        return Math.round(value);
-                    }
-                }
-            },
-            tooltip: {
-                theme: 'dark',
-                y: {
-                    formatter: function(value) {
-                        return value + ' incidents';
-                    }
-                }
-            },
-            legend: {
+document.addEventListener('DOMContentLoaded', function() {
+    // Weather data from context
+    const weatherData = {{ weather_data|safe }};
+    
+    // Chart options
+    const options = {
+        series: [{
+            name: 'Temperature',
+            data: weatherData.temperature
+        }],
+        chart: {
+            type: 'line',
+            height: 400,
+            toolbar: {
                 show: false
+            },
+            zoom: {
+                enabled: true
+            },
+            animations: {
+                enabled: true,
+                easing: 'easeinout',
+                speed: 800
             }
-        };
-
-        if (incidentTrendsChart) {
-            incidentTrendsChart.destroy();
-        }
-
-        incidentTrendsChart = new ApexCharts(document.querySelector("#incidentTrendsChart"), options);
-        incidentTrendsChart.render();
-    }
-
-    function updateChartType(type) {
-        if (incidentTrendsChart) {
-            incidentTrendsChart.updateOptions({
-                chart: {
-                    type: type
+        },
+        colors: ['#696cff'],
+        stroke: {
+            curve: 'smooth',
+            width: 3,
+            lineCap: 'round'
+        },
+        grid: {
+            borderColor: '#e7e7e7',
+            padding: {
+                top: 10,
+                right: 10,
+                bottom: 10,
+                left: 10
+            }
+        },
+        markers: {
+            size: 4,
+            colors: ['#696cff'],
+            strokeColors: '#fff',
+            strokeWidth: 2,
+            hover: {
+                size: 6
+            }
+        },
+        xaxis: {
+            categories: weatherData.dates,
+            labels: {
+                style: {
+                    colors: '#697a8d',
+                    fontSize: '12px'
+                },
+                rotate: -45,
+                rotateAlways: true,
+                maxHeight: 60
+            },
+            axisBorder: {
+                show: true,
+                color: '#e7e7e7'
+            },
+            axisTicks: {
+                show: true,
+                color: '#e7e7e7'
+            }
+        },
+        yaxis: {
+            labels: {
+                style: {
+                    colors: '#697a8d',
+                    fontSize: '12px'
                 }
-            });
-        }
-    }
-
-    function loadIncidentTrends(timeRange = 'month') {
-        fetch(`/api/incident-trends/?time_range=${timeRange}`)
-            .then(response => response.json())
-            .then(data => {
-                initIncidentTrendsChart(data);
-            })
-            .catch(error => {
-                console.error('Error loading incident trends:', error);
-                // Show error message to user
-                const chartContainer = document.querySelector("#incidentTrendsChart");
-                if (chartContainer) {
-                    chartContainer.innerHTML = `
-                        <div class="alert alert-danger m-3">
-                            <i class="bi bi-exclamation-triangle me-2"></i>
-                            Failed to load incident trends. Please try again later.
-                        </div>
-                    `;
-                }
-            });
-    }
-
-    // Event Listeners
-    document.getElementById('timeRange').addEventListener('change', function() {
-        loadIncidentTrends(this.value);
-    });
-
-    // Initialize chart on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        loadIncidentTrends();
-    });
-
-    function loadChartData() {
-        // Pie Chart (Severity)
-        fetch("{% url 'fire:incident_statistics' %}")
-            .then(response => response.json())
-            .then(data => {
-                const severityLevels = data.by_severity.map(item => item.severity_level);
-                const counts = data.by_severity.map(item => item.count);
-                const pieChartCanvas = document.getElementById('pieChart');
-
-                if (pieChartCanvas) {
-                    const pieChart = pieChartCanvas.getContext('2d');
-                    new Chart(pieChart, {
-                        type: 'pie',
-                        data: {
-                            datasets: [{
-                                data: counts,
-                                backgroundColor: ["#1d7af3", "#f3545d", "#fdaf4b"],
-                                borderWidth: 0,
-                            }],
-                            labels: severityLevels,
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    fontColor: 'rgb(154, 154, 154)',
-                                    fontSize: 11,
-                                    usePointStyle: true,
-                                    padding: 20,
-                                },
-                            },
-                            tooltips: {
-                                bodySpacing: 4,
-                                mode: 'nearest',
-                                intersect: 0,
-                                position: 'nearest',
-                                xPadding: 10,
-                                yPadding: 10,
-                                caretPadding: 10,
-                            },
-                            layout: {
-                                padding: {
-                                    left: 20,
-                                    right: 20,
-                                    top: 20,
-                                    bottom: 20,
-                                },
-                            },
-                        },
-                    });
-                }
-            })
-            .catch(error => console.error('Error loading pie chart:', error));
-
-        // Line Chart (Example - needs data endpoint)
-        const lineChartCanvas = document.getElementById('lineChart');
-        if (lineChartCanvas) {
-           const lineChart = lineChartCanvas.getContext('2d');
-           new Chart(lineChart, {
-             type: "line",
-             data: {
-               labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-               datasets: [
-                 {
-                   label: "Example Data",
-                   borderColor: "#1d7af3",
-                   pointBorderColor: "#FFF",
-                   pointBackgroundColor: "#1d7af3",
-                   pointBorderWidth: 2,
-                   pointHoverRadius: 4,
-                   pointHoverBorderWidth: 1,
-                   pointRadius: 4,
-                   backgroundColor: "transparent",
-                   fill: true,
-                   borderWidth: 2,
-                   data: [542, 480, 430, 550, 530, 453, 380, 434, 568, 610, 700, 900],
-                 },
-               ],
-             },
-             options: {
-               responsive: true,
-               maintainAspectRatio: false,
-               legend: {
-                 position: "bottom",
-                 labels: {
-                   padding: 10,
-                   fontColor: "#1d7af3",
-                 },
-               },
-               tooltips: {
-                 bodySpacing: 4,
-                 mode: "nearest",
-                 intersect: 0,
-                 position: "nearest",
-                 xPadding: 10,
-                 yPadding: 10,
-                 caretPadding: 10,
-               },
-               layout: {
-                 padding: { left: 15, right: 15, top: 15, bottom: 15 },
-               },
-             },
-           });
-        }
-
-        // Multiple Line Chart (Example - needs data endpoint)
-        const multipleLineChartCanvas = document.getElementById('multipleLineChart');
-         if(multipleLineChartCanvas) {
-            const multipleLineChart = multipleLineChartCanvas.getContext('2d');
-            new Chart(multipleLineChart, {
-                type: "line",
-                data: {
-                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                    datasets: [
-                        {
-                            label: "Example Series 1",
-                            borderColor: "#1d7af3",
-                            pointBorderColor: "#FFF",
-                            pointBackgroundColor: "#1d7af3",
-                            pointBorderWidth: 2,
-                            pointHoverRadius: 4,
-                            pointHoverBorderWidth: 1,
-                            pointRadius: 4,
-                            backgroundColor: "transparent",
-                            fill: true,
-                            borderWidth: 2,
-                            data: [30, 45, 45, 68, 69, 90, 100, 158, 177, 200, 245, 256],
-                        },
-                        {
-                            label: "Example Series 2",
-                            borderColor: "#59d05d",
-                            pointBorderColor: "#FFF",
-                            pointBackgroundColor: "#59d05d",
-                            pointBorderWidth: 2,
-                            pointHoverRadius: 4,
-                            pointHoverBorderWidth: 1,
-                            pointRadius: 4,
-                            backgroundColor: "transparent",
-                            fill: true,
-                            borderWidth: 2,
-                            data: [10, 20, 55, 75, 80, 48, 59, 55, 23, 107, 60, 87],
-                        },
-                    ],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    legend: {
-                        position: "top",
-                    },
-                    tooltips: {
-                        bodySpacing: 4,
-                        mode: "nearest",
-                        intersect: 0,
-                        position: "nearest",
-                        xPadding: 10,
-                        yPadding: 10,
-                        caretPadding: 10,
-                    },
-                    layout: {
-                        padding: { left: 15, right: 15, top: 15, bottom: 15 },
-                    },
-                },
-            });
-         }
-
-        // Multiple Bar Chart (Severity by Month)
-        fetch("/multiBarChart/") // Assuming this endpoint exists
-            .then(response => response.json())
-            .then(data => {
-                const severityLevels = Object.keys(data);
-                const datasets = [];
-                const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-                // Colors for different severity levels (match Pie Chart colors)
-                const colors = {
-                    "Minor Fire": "#1d7af3", // Blue for Minor
-                    "Major Fire": "#f3545d",  // Red for Major
-                    "Moderate Fire": "#fdaf4b" // Yellow for Moderate
-                };
-
-                severityLevels.forEach(level => {
-                    const monthData = [];
-                    for (let i = 1; i <= 12; i++) {
-                        const monthKey = i.toString();
-                        // Assuming data[level] is an object like { '1': 5, '2': 10, ... }
-                        monthData.push(data[level][monthKey] || 0);
-                    }
-
-                    datasets.push({
-                        label: level,
-                        backgroundColor: colors[level] || "#177dff",
-                        borderColor: colors[level] || "#177dff",
-                        data: monthData
-                    });
-                });
-
-                const multipleBarChartCanvas = document.getElementById('multipleBarChart');
-                if(multipleBarChartCanvas) {
-                   const multipleBarChart = multipleBarChartCanvas.getContext('2d');
-                    new Chart(multipleBarChart, {
-                        type: "bar",
-                        data: {
-                            labels: months,
-                            datasets: datasets
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            legend: {
-                                position: "bottom"
-                            },
-                            title: {
-                                display: true,
-                                text: "Fire Incidents by Severity Level and Month"
-                            },
-                            tooltips: {
-                                mode: "index",
-                                intersect: false
-                            },
-                            scales: {
-                                x: { // Use 'x' and 'y' for Chart.js v3+
-                                    stacked: true
-                                },
-                                y: {
-                                    stacked: true
-                                }
-                            }
-                        }
-                    });
-                }
-            })
-            .catch(error => console.error('Error loading multiple bar chart:', error));
-
-        // Other charts need data endpoints and implementation similar to Pie/Multiple Bar
-        // Bar Chart (Example)
-        const barChartCanvas = document.getElementById('barChart');
-        if(barChartCanvas) {
-            const barChart = barChartCanvas.getContext('2d');
-            new Chart(barChart, {
-                type: "bar",
-                data: {
-                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                    datasets: [
-                        {
-                            label: "Example Sales",
-                            backgroundColor: "rgb(23, 125, 255)",
-                            borderColor: "rgb(23, 125, 255)",
-                            data: [3, 2, 9, 5, 4, 6, 4, 6, 7, 8, 7, 4],
-                        },
-                    ],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { // Use 'y' for Chart.js v3+
-                            ticks: {
-                                beginAtZero: true,
-                            },
-                        },
-                    },
-                },
-            });
-        }
-
-        // Doughnut Chart (Example)
-        const doughnutChartCanvas = document.getElementById('doughnutChart');
-        if(doughnutChartCanvas) {
-            const doughnutChart = doughnutChartCanvas.getContext('2d');
-            new Chart(doughnutChart, {
-                type: "doughnut",
-                data: {
-                    datasets: [
-                        {
-                            data: [10, 20, 30],
-                            backgroundColor: ["#f3545d", "#fdaf4b", "#1d7af3"],
-                        },\n                    ],
-
-                    labels: ["Red", "Yellow", "Blue"],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    legend: {
-                        position: "bottom",
-                    },
-                    layout: {
-                        padding: {
-                            left: 20,
-                            right: 20,
-                            top: 20,
-                            bottom: 20,
-                        },
-                    },
-                },
-            });
-        }
-
-        // Radar Chart (Example)
-        const radarChartCanvas = document.getElementById('radarChart');
-        if(radarChartCanvas) {
-            const radarChart = radarChartCanvas.getContext('2d');
-            new Chart(radarChart, {
-                type: "radar",
-                data: {
-                    labels: ["Running", "Swimming", "Eating", "Cycling", "Jumping"],
-                    datasets: [
-                        {
-                            data: [20, 10, 30, 2, 30],
-                            borderColor: "#1d7af3",
-                            backgroundColor: "rgba(29, 122, 243, 0.25)",
-                            pointBackgroundColor: "#1d7af3",
-                            pointHoverRadius: 4,
-                            pointRadius: 3,
-                            label: "Team 1",
-                        },
-                        {
-                            data: [10, 20, 15, 30, 22],
-                            borderColor: "#716aca",
-                            backgroundColor: "rgba(113, 106, 202, 0.25)",
-                            pointBackgroundColor: "#716aca",
-                            pointHoverRadius: 4,
-                            pointRadius: 3,
-                            label: "Team 2",
-                        },
-                    ],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    legend: {
-                        position: "bottom",
-                    },
-                },
-            });
-        }
-
-        // Bubble Chart (Example)
-        const bubbleChartCanvas = document.getElementById('bubbleChart');
-        if(bubbleChartCanvas) {
-            const bubbleChart = bubbleChartCanvas.getContext('2d');
-            new Chart(bubbleChart, {
-                type: "bubble",
-                data: {
-                    datasets: [
-                        {
-                            label: "Car",
-                            data: [
-                                { x: 25, y: 17, r: 25 },
-                                { x: 30, y: 25, r: 28 },
-                                { x: 35, y: 30, r: 8 },
-                            ],
-                            backgroundColor: "#716aca",
-                        },
-                        {
-                            label: "Motorcycles",
-                            data: [
-                                { x: 10, y: 17, r: 20 },
-                                { x: 30, y: 10, r: 7 },
-                                { x: 35, y: 20, r: 10 },
-                            ],
-                            backgroundColor: "#1d7af3",
-                        },
-                    ],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    legend: {
-                        position: "bottom",
-                    },
-                    scales: {
-                        y: { // Use 'y' for Chart.js v3+
-                            ticks: {
-                                beginAtZero: true,
-                            },
-                        },
-                        x: { // Use 'x' for Chart.js v3+
-                            ticks: {
-                                beginAtZero: true,
-                            },
-                        },
-                    },
-                },
-            });
-        }
-
-        // Chart with HTML Legends (Example)
-        const htmlLegendsChartCanvas = document.getElementById('htmlLegendsChart');
-        if(htmlLegendsChartCanvas) {
-           const htmlLegendsChart = htmlLegendsChartCanvas.getContext('2d');
-           var gradientStroke = htmlLegendsChart.createLinearGradient(500, 0, 100, 0);
-            gradientStroke.addColorStop(0, "#177dff");
-            gradientStroke.addColorStop(1, "#80b6f4");
-
-            var gradientFill = htmlLegendsChart.createLinearGradient(500, 0, 100, 0);
-            gradientFill.addColorStop(0, "rgba(23, 125, 255, 0.7)");
-            gradientFill.addColorStop(1, "rgba(128, 182, 244, 0.3)");
-
-            var gradientStroke2 = htmlLegendsChart.createLinearGradient(500, 0, 100, 0);
-            gradientStroke2.addColorStop(0, "#f3545d");
-            gradientStroke2.addColorStop(1, "#ff8990");
-
-            var gradientFill2 = htmlLegendsChart.createLinearGradient(500, 0, 100, 0);
-            gradientFill2.addColorStop(0, "rgba(243, 84, 93, 0.7)");
-            gradientFill2.addColorStop(1, "rgba(255, 137, 144, 0.3)");
-
-            var gradientStroke3 = htmlLegendsChart.createLinearGradient(500, 0, 100, 0);
-            gradientStroke3.addColorStop(0, "#fdaf4b");
-            gradientStroke3.addColorStop(1, "#ffc478");
-
-            var gradientFill3 = htmlLegendsChart.createLinearGradient(500, 0, 100, 0);
-            gradientFill3.addColorStop(0, "rgba(253, 175, 75, 0.7)");
-            gradientFill3.addColorStop(1, "rgba(255, 196, 120, 0.3)");
-
-            var myHtmlLegendsChart = new Chart(htmlLegendsChart, {
-                type: "line",
-                data: {
-                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                    datasets: [
-                        {
-                            label: "Subscribers",
-                            borderColor: gradientStroke2,
-                            pointBackgroundColor: gradientStroke2,
-                            pointRadius: 0,
-                            backgroundColor: gradientFill2,
-                            legendColor: "#f3545d",
-                            fill: true,
-                            borderWidth: 1,
-                            data: [154, 184, 175, 203, 210, 231, 240, 278, 252, 312, 320, 374],
-                        },
-                        {
-                            label: "New Visitors",
-                            borderColor: gradientStroke3,
-                            pointBackgroundColor: gradientStroke3,
-                            pointRadius: 0,
-                            backgroundColor: gradientFill3,
-                            legendColor: "#fdaf4b",
-                            fill: true,
-                            borderWidth: 1,
-                            data: [256, 230, 245, 287, 240, 250, 230, 295, 331, 431, 456, 521],
-                        },
-                        {
-                            label: "Active Users",
-                            borderColor: gradientStroke,
-                            pointBackgroundColor: gradientStroke,
-                            pointRadius: 0,
-                            backgroundColor: gradientFill,
-                            legendColor: "#177dff",
-                            fill: true,
-                            borderWidth: 1,
-                            data: [542, 480, 430, 550, 530, 453, 380, 434, 568, 610, 700, 900],
-                        },
-                    ],
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    legend: {
-                        display: false,
-                    },
-                    tooltips: {
-                        bodySpacing: 4,
-                        mode: "nearest",
-                        intersect: 0,
-                        position: "nearest",
-                        xPadding: 10,
-                        yPadding: 10,
-                        caretPadding: 10,
-                    },
-                    layout: {
-                        padding: { left: 15, right: 15, top: 15, bottom: 15 },
-                    },
-                    scales: {
-                        y: { // Use 'y' for Chart.js v3+
-                            ticks: {
-                                fontColor: "rgba(0,0,0,0.5)",
-                                fontStyle: "500",
-                                beginAtZero: false,
-                                maxTicksLimit: 5,
-                                padding: 20,
-                            },
-                            gridLines: {
-                                drawTicks: false,
-                                display: false,
-                            },
-                        },
-                        x: { // Use 'x' for Chart.js v3+
-                            gridLines: {
-                                zeroLineColor: "transparent",
-                            },
-                            ticks: {
-                                padding: 20,
-                                fontColor: "rgba(0,0,0,0.5)",
-                                fontStyle: "500",
-                            },
-                        },
-                    },
-                    legendCallback: function (chart) {
-                        var text = [];
-                        text.push('<ul class="' + chart.id + '-legend html-legend">');
-                        for (var i = 0; i < chart.data.datasets.length; i++) {
-                            text.push('<li><span style="background-color:' + chart.data.datasets[i].legendColor + '"></span>');
-                            if (chart.data.datasets[i].label) {
-                                text.push(chart.data.datasets[i].label);
-                            }
-                            text.push('</li>');
-                        }
-                        text.push('</ul>');
-                        return text.join('');
-                    },
-                },
-            });
-
-            const myLegendContainer = document.getElementById('myChartLegend');
-            if(myLegendContainer) {
-                // generate HTML legend
-                myLegendContainer.innerHTML = myHtmlLegendsChart.generateLegend();
-
-                // bind onClick event to all LI-tags of the legend
-                const legendItems = myLegendContainer.getElementsByTagName('li');
-                for (let i = 0; i < legendItems.length; i += 1) {
-                    legendItems[i].addEventListener('click', legendClickCallback, false);
+            },
+            axisBorder: {
+                show: true,
+                color: '#e7e7e7'
+            },
+            axisTicks: {
+                show: true,
+                color: '#e7e7e7'
+            }
+        },
+        tooltip: {
+            theme: 'light',
+            x: {
+                format: 'dd MMM yyyy HH:mm'
+            },
+            y: {
+                formatter: function(value) {
+                    return value + '°C';
                 }
             }
+        },
+        legend: {
+            show: true,
+            position: 'top',
+            horizontalAlign: 'right',
+            fontSize: '14px',
+            markers: {
+                width: 12,
+                height: 12,
+                radius: 12
+            }
+        }
+    };
 
-            // Helper function for HTML legend click
-            function legendClickCallback(event) {
-                event = event || window.event;
+    // Initialize chart
+    const chart = new ApexCharts(document.querySelector("#weatherChart"), options);
+    chart.render();
 
-                const target = event.target;
-                let li = target.closest('li');
+    // Handle metric selection
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const metric = this.dataset.metric;
+            const metricName = this.textContent;
+            const metricData = weatherData[metric];
+            let unit = '';
+            
+            // Set appropriate unit based on metric
+            switch(metric) {
+                case 'temperature':
+                    unit = '°C';
+                    break;
+                case 'humidity':
+                    unit = '%';
+                    break;
+                case 'wind_speed':
+                    unit = ' km/h';
+                    break;
+            }
 
-                if (li) {
-                    const legendId = li.parentNode.classList[0];
-                    const chart = Chart.instances[Chart.getChart(legendId)]; // Get Chart.js instance
-
-                    if(chart) {
-                        const index = Array.prototype.slice.call(li.parentNode.childNodes).indexOf(li);
-                        const meta = chart.getDatasetMeta(index);
-
-                        // See controller.isDatasetVisible, controller.setDatasetVisibility
-                        meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
-
-                        // We hid a dataset, rerender the chart
-                        chart.update();
+            // Update chart
+            chart.updateOptions({
+                series: [{
+                    name: metricName,
+                    data: metricData
+                }],
+                tooltip: {
+                    y: {
+                        formatter: function(value) {
+                            return value + unit;
+                        }
                     }
                 }
-            }
-        }
+            });
 
-        // Other charts (Bar, Doughnut, Radar, Bubble) need to be initialized similarly with checks for their elements
-        // Their data fetching logic/endpoints would also need to be implemented.
-    }
-
-    // Call loadChartData when the page is ready
-    document.addEventListener('DOMContentLoaded', loadChartData);
-
+            // Update dropdown button text
+            document.getElementById('weatherMetricDropdown').textContent = metricName;
+        });
+    });
+});
 </script>
 {% endblock page_js %}
-``` 
+```
