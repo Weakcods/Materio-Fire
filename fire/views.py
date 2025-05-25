@@ -14,7 +14,6 @@ from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.db.models.functions import TruncMonth, TruncDate, TruncWeek
-from django.db.models import Q
 
 def login_view(request):
     if request.method == 'POST':
@@ -53,24 +52,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context['layout_path'] = 'layouts/master.html'
         
-        # Get search query
-        search_query = self.request.GET.get('search', '')
-        
         # Overview stats
         context['total_incidents'] = Incident.objects.count()
         context['total_stations'] = FireStation.objects.count()
         context['total_firefighters'] = Firefighters.objects.count()
         context['total_trucks'] = FireTruck.objects.count()
         
-        # Recent incidents with search
-        recent_incidents = Incident.objects.all()
-        if search_query:
-            recent_incidents = recent_incidents.filter(
-                Q(description__icontains=search_query) |
-                Q(location__name__icontains=search_query) |
-                Q(severity_level__icontains=search_query)
-            )
-        context['recent_incidents'] = recent_incidents.order_by('-date_time')[:5]
+        # Recent incidents
+        context['recent_incidents'] = Incident.objects.all().order_by('-date_time')[:5]
         
         # Incident Trends Chart Data
         last_6_months = timezone.now() - timedelta(days=180)
@@ -132,7 +121,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'data': [item['performance'] for item in station_performance]
         }
         
-        # Response Time Data
+        # Response Time Data (using time difference between created_at and date_time)
         response_time_data = []
         for station in FireStation.objects.all():
             station_lat = float(station.latitude)
@@ -167,9 +156,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'labels': [item['name'] for item in response_time_data],
             'data': [item['time'] for item in response_time_data]
         }
-        
-        # Add search query to context
-        context['search_query'] = search_query
         
         return context
 
