@@ -32,7 +32,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # If using the .env file for SECRET_KEY then comment below random SECRET_KEY generation code.
-SECRET_KEY = 'django-insecure-your-secret-key-here'
+SECRET_KEY = 'django-insecure-f78e96%nau32wn^d3b93frv^&k#pxt94zl_5&&^bfsywdc65vk'
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -44,7 +44,11 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'joshuaaaaa2.pythonanywhere.com',
-    '.pythonanywhere.com'  # This allows all subdomains of pythonanywhere.com
+    'fireapps2.pythonanywhere.com',
+    '.pythonanywhere.com',
+    '54.221.127.38',
+    '3.89.243.4',
+    '175.176.76.142'
 ]
 
 # Current DJANGO_ENVIRONMENT
@@ -163,7 +167,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
@@ -196,8 +200,8 @@ LOGOUT_REDIRECT_URL = 'login'
 # Session Settings
 # ------------------------------------------------------------------------------
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 days
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = False  # Set to False for PythonAnywhere
+CSRF_COOKIE_SECURE = False  # Set to False for PythonAnywhere
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Session expires when browser closes
 SESSION_SAVE_EVERY_REQUEST = True  # Update session on every request
 CSRF_COOKIE_HTTPONLY = True  # Prevent JavaScript access to CSRF token
@@ -217,14 +221,37 @@ PASSWORD_HASHERS = [
 ]
 
 # Media files
-MEDIA_URL = 'media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Security settings for production
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False  # Set to False for PythonAnywhere
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs/django.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
+
+# Ensure the logs directory exists
+os.makedirs(BASE_DIR / 'logs', exist_ok=True)
 
 # Your stuff...
 # ------------------------------------------------------------------------------
