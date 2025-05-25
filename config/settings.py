@@ -30,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", default='django-insecure-' + ''.join(random.choice(string.ascii_lowercase) for i in range(32)))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = [
@@ -174,18 +174,18 @@ THEME_LAYOUT_DIR = THEME_LAYOUT_DIR
 THEME_VARIABLES = THEME_VARIABLES
 
 # Authentication Settings
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'fire:dashboard'
-LOGOUT_REDIRECT_URL = 'login'
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/fire/dashboard/'
+LOGOUT_REDIRECT_URL = '/login/'
 
 # Session Settings
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 days
-SESSION_COOKIE_SECURE = False  # Set to False for PythonAnywhere
-CSRF_COOKIE_SECURE = False  # Set to False for PythonAnywhere
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Session expires when browser closes
-SESSION_SAVE_EVERY_REQUEST = True  # Update session on every request
-CSRF_COOKIE_HTTPONLY = True  # Prevent JavaScript access to CSRF token
-SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
+SESSION_COOKIE_SECURE = False  # Set to False for local development
+CSRF_COOKIE_SECURE = False  # Set to False for local development
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Changed to False to prevent session expiry
+SESSION_SAVE_EVERY_REQUEST = True
+CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_HTTPONLY = True
 
 # Authentication Backends
 AUTHENTICATION_BACKENDS = [

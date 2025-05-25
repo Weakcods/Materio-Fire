@@ -26,11 +26,11 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 def redirect_to_dashboard(request):
-    return redirect('fire:dashboard')
+    return redirect('/fire/dashboard/')  # Changed to use absolute path
 
 urlpatterns = [
     # Authentication URLs first
-    path('', redirect_to_dashboard, name='index'),  # Redirect root to fire dashboard
+    path('', redirect_to_dashboard, name='index'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.custom_logout, name='logout'),
     path('register/', views.register_view, name='register'),
@@ -50,7 +50,7 @@ urlpatterns = [
     path("", include("apps.forms.urls")),
     path("", include("apps.form_layouts.urls")),
     path("", include("apps.tables.urls")),
-    path("fire/", include("fire.urls", namespace="fire")),  # Add namespace for fire app
+    path("fire/", include("fire.urls", namespace="fire")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 handler404 = SystemView.as_view(template_name="pages_misc_error.html", status=404)
