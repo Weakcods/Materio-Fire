@@ -26,18 +26,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-
-# Update secret key in .env file and .env.prod file
-# SECRET_KEY = os.environ.get("SECRET_KEY", default='')
-
 # SECURITY WARNING: keep the secret key used in production secret!
-# If using the .env file for SECRET_KEY then comment below random SECRET_KEY generation code.
-SECRET_KEY = 'django-insecure-f78e96%nau32wn^d3b93frv^&k#pxt94zl_5&&^bfsywdc65vk'
-
+SECRET_KEY = os.environ.get("SECRET_KEY", default='django-insecure-' + ''.join(random.choice(string.ascii_lowercase) for i in range(32)))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = [
@@ -54,9 +47,7 @@ ALLOWED_HOSTS = [
 # Current DJANGO_ENVIRONMENT
 ENVIRONMENT = os.environ.get("DJANGO_ENVIRONMENT", default="local")
 
-
 # Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -121,10 +112,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-
 # Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -132,10 +120,7 @@ DATABASES = {
     }
 }
 
-
 # Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -151,18 +136,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/5.0/topics/i18n/
-
 LANGUAGE_CODE = "en"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
@@ -188,27 +166,19 @@ X_FRAME_OPTIONS = 'DENY'
 # Default URL on which Django application runs for specific environment
 BASE_URL = os.environ.get("BASE_URL", default="http://127.0.0.1:8000")
 
-
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Template Settings
-# ------------------------------------------------------------------------------
-
 THEME_LAYOUT_DIR = THEME_LAYOUT_DIR
 THEME_VARIABLES = THEME_VARIABLES
 
-
 # Authentication Settings
-# ------------------------------------------------------------------------------
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'fire:dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 
 # Session Settings
-# ------------------------------------------------------------------------------
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 days
 SESSION_COOKIE_SECURE = False  # Set to False for PythonAnywhere
 CSRF_COOKIE_SECURE = False  # Set to False for PythonAnywhere
