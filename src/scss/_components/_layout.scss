@@ -413,9 +413,10 @@ html:not(.layout-footer-fixed) .content-wrapper {
     height: 100% !important;
     left: 0;
     display: none;
-    background: $modal-backdrop-bg;
-    opacity: $modal-backdrop-opacity;
+    background: rgba(0, 0, 0, 0.2);
+    opacity: 0.5;
     cursor: pointer;
+    transition: opacity 0.2s ease-in-out;
 
     .layout-menu-expanded & {
       display: block;
